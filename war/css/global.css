@@ -1,0 +1,127 @@
+@CHARSET "utf-8";
+
+body { background-color: #EEEEEE; }
+
+h1 { 
+	height: 33px;
+	font-size: x-large;
+	font-family: "Times New Roman", Times, serif;
+}
+
+ul li { list-style: square; }
+a:hover { background-color: white; }
+
+input.err { background-color: orange; }
+
+#header{
+ width:760px;
+ background-color: #DEDD9B;
+}
+
+
+#navigation {
+	height: 41px;
+	float: left;
+	position: absolute;
+	top: 62px;
+	right: 0px;
+}
+
+#navigation .left {
+	float: left;
+	width: 5px;
+	height: 41px;
+	/* background: url('../images/navigation.png') no-repeat left top; */
+	background: url('../images/navigation_l.png') no-repeat left top;
+}
+
+#ie6 #navigation .left {
+	background: transparent none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='../images/navigation_l.png', sizingMethod='scale');
+	zoom: 1;
+}
+
+#navigation .right {
+	float: left;
+	width: 3px;
+	height: 41px;
+	background: url('../images/navigation.png') no-repeat right top;
+}
+
+#navigation ul,
+#navigation ul li {
+	float: left;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	line-height: 38px;
+}
+
+#navigation ul {
+	height: 41px;
+	background: url('../images/navigation.png') repeat-x 0 -41px;
+}
+
+#navigation ul li a {
+	float: left;
+	display: block;
+	height: 41px;
+	padding: 0 18px;
+	color: #ccc;
+	text-decoration: none;
+	background: url('../images/navigation_s.png') no-repeat right top;
+}
+
+#navigation ul li.selected a {
+	color: #fff;
+}
+
+#navigation ul li.last a{
+	background-image: none;
+}
+
+#navigation ul li a:hover {
+	color: #fff;
+}
+
+
+#menu{
+ width:160px;
+ height:400px;
+ text-align:left;
+ vertical-align: top;
+ float:left;
+ background-color: aqua;
+}
+
+
+#body{
+ width:600px;
+ height:400px;
+ float:left;
+ background-color: white;
+}
+
+#footer{
+ width:760px;
+ text-align:left;
+ background-color: black;
+ color: white;
+ clear: left;
+}
+h1.logo {
+position: absolute;
+top: 55px;
+left: 28px;
+margin: 0;
+}
+h1.logo a {
+display: block;
+background: url('../img/logo.gif') no-repeat;
+}
+h1.logo, h1.logo a {
+width: 158px;
+height: 130px;
+}
+
