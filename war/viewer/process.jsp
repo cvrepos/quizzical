@@ -17,6 +17,7 @@
 		%>
 		var action = "<%= request.getAttribute("QN_action") %>";
 		var module = "<%= request.getAttribute("QN_mname") %>";
+		var mid = "<%= request.getAttribute("QN_mid") %>";
 		<%
 		}
 		%>
@@ -29,7 +30,7 @@
 						return;					
 					} else if(qObj.code == "ALREADY_STARTED"){
 						$('#question_container').hide();					
-						$('#message_board').html("You have already started the module. <br/>" + 
+						$('#message_board').html("You have already started the module - <i>"+ module +"</i> <br/>" + 
 								"If you want to restart the module please click restart. <br/>" + 
 								"If you want to resume the module please click resume button. <br/>" + 
 								"<input type='button' id='reset-button' value='restart'/>"  + 
@@ -44,7 +45,10 @@
 						return;
 					} else if(qObj.code == "COMPLETED"){
 						alert("Congratulations! You have completed the module.");
-						window.location.href = "./result?QN_mname="+ qObj.mname;
+						window.location.href = "./result?QN_mid="
+							+ qObj.mid 
+							+ "&QN_mname="
+							+ qObj.mname;
 						return;						
 					}
 					else {									
@@ -55,6 +59,7 @@
 						$('#ans4').html(qObj.ans4);
 						$('#qid' ).val(qObj.qid);
 						$('#mname').val(qObj.mname);
+						$('#mid').val(qObj.mid);
 						$('#message_board').hide();
 						$('#question_container').show();
 					}					
@@ -77,13 +82,22 @@
 			};
 			
 			if(action == 'start' && module){
-				var dataString = "QN_action=start&QN_mname=" + module;
+				var dataString = "QN_action=start&QN_mid=" 
+					+ mid 
+					+ "&QN_mname="
+					+ module;
 				doAjax(dataString);				
 			}else{
 				$("#question_container").hide();
 			}
 			$('#next-button').click(function() {
-				var dataString = "QN_action=submit&QN_qid=" + $('#qid').val() + "&QN_mname=" + $('#mname').val() + "&QN_ans=";
+				var dataString = "QN_action=submit&QN_qid=" 
+				+ $('#qid').val() 
+				+ "&QN_mname=" 
+				+ $('#mname').val() 
+				+ "&QN_mid=" 
+				+ $('#mid').val() 
+				+ "&QN_ans=";
 				if($('#c1').is(':checked')){
 		          dataString += "1,";   
 				}
@@ -121,6 +135,7 @@
 	</ul>
 	<input type='hidden' id='qid' value='' />
 	<input type='hidden' id='mname' value='' />
+	<input type='hidden' id='mid' value='' />
 	<input type="button" id='prev-button' value='prev'/>
 	<input type="button" id='next-button' value='next'/>
 	<input type="button" id='complete-button' value='complete'/>        

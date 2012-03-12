@@ -7,7 +7,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 public class ModuleTest extends AppEngineTestCase {
 
-    private Module model = new Module();
+    private ModCopy model = new ModCopy();
 
     @Test
     public void test() throws Exception {

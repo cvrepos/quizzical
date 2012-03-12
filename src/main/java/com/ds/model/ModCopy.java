@@ -1,6 +1,11 @@
 package com.ds.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -8,72 +13,43 @@ import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Model;
 
 @Model(schemaVersion = 1)
-public class Module implements Serializable {
+public class ModCopy implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Attribute(primaryKey = true)
     private Key key;
+    
+    private String name;
+    private String user;
+    
+    @Attribute(lob = true)
+    private List<QuestionState> qStates = new LinkedList<QuestionState>();
+    
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    
+
 
     @Attribute(version = true)
     private Long version;
-    private String owner;
-    private String name;
-    private long questionCount = 0;
-    private long cloneCount = 0;
-    private int  ratings = 1;
-    private String description;    
 
-    
-    public String getOwner() {
-		return owner;
-	}
-
-	public void setOwner(String owner) {
-		this.owner = owner;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public long getQuestionCount() {
-		return questionCount;
-	}
-
-	public void setQuestionCount(long questionCount) {
-		this.questionCount = questionCount;
-	}
-
-	public long getCloneCount() {
-		return cloneCount;
-	}
-
-	public void setCloneCount(long cloneCount) {
-		this.cloneCount = cloneCount;
-	}
-
-	public int getRatings() {
-		return ratings;
-	}
-
-	public void setRatings(int ratings) {
-		this.ratings = ratings;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	/**
+    /**
      * Returns the key.
      *
      * @return the key
@@ -130,7 +106,7 @@ public class Module implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Module other = (Module) obj;
+        ModCopy other = (ModCopy) obj;
         if (key == null) {
             if (other.key != null) {
                 return false;
@@ -140,4 +116,13 @@ public class Module implements Serializable {
         }
         return true;
     }
+
+    public void setQStates(List<QuestionState> qStates) {
+        this.qStates = qStates;
+    }
+
+    public List<QuestionState> getQStates() {
+        return qStates;
+    }
 }
+

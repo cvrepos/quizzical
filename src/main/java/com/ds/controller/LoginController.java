@@ -1,6 +1,7 @@
 package com.ds.controller;
 
 import java.util.Enumeration;
+import java.util.logging.Logger;
 
 import javax.servlet.http.Cookie;
 
@@ -17,6 +18,7 @@ public class LoginController extends Controller {
     
 
     private QuizProcessorService service = QuizProcessorService.getInstance();
+    private final static Logger log = Logger.getLogger(LoginController.class.getName());
     @Override
     public Navigation run() throws Exception {
         
@@ -41,7 +43,7 @@ public class LoginController extends Controller {
                     //check for the orig URL that forwarded the user to login
                     String origUrl = (String) request.getAttribute("orig");                    
                     if(!Utils.isValid(origUrl)){
-                        System.err.println("No orig URL is found");  
+                        log.info("No orig URL is found");  
                         return redirect("./viewer/");
                     }else{
                         origUrl +="?";
@@ -52,7 +54,7 @@ public class LoginController extends Controller {
                                 origUrl += "&" + attr +"="+ request.getAttribute(attr);
                             }                                                        
                         }
-                        System.err.println(">>>>>Orig url:" + origUrl);
+                        log.info(">>>>>Orig url:" + origUrl);
                         return redirect(response.encodeRedirectURL(origUrl));
                         
                     }                
@@ -90,7 +92,7 @@ public class LoginController extends Controller {
             String op = (String)request.getAttribute("op");
             if(Utils.isValid(op)){
                if(op.equals("logout")){
-                   System.err.println("logout requested.");
+                   log.info("logout requested.");
                    //clean the session
                    service.removeSession(session);  
                    Cookie cookie = new Cookie("session", "");                   

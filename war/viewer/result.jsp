@@ -85,17 +85,19 @@
 				//alert(dataString);
 				$.ajax({					
 					type: "POST",
-					url: "../process",
+					url: "./process",
 					data: dataString,
 					success: loadResponse
 				  	});
 			};	
 			
 								
-			var dataString = "QN_action=result&QN_mname=<%=request.getAttribute("QN_mname") %>";
+			var dataString = "QN_action=result&QN_mname=<%=request.getAttribute("QN_mname") %>" 
+						+"&QN_mid=<%=request.getAttribute("QN_mid") %>";
 			doAjax(dataString);
 
-			dataString = "QN_action=moduleanalysis&QN_mname=<%=request.getAttribute("QN_mname") %>";
+			dataString = "QN_action=moduleanalysis&QN_mname=<%=request.getAttribute("QN_mname") %>"
+						+"&QN_mid=<%=request.getAttribute("QN_mid") %>";
 			doAjax(dataString);
 			
 			

@@ -3,6 +3,7 @@ package com.ds.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
-import com.ds.model.Module;
+import com.ds.model.ModCopy;
 import com.ds.model.QuestionState;
 import com.ds.model.QuestionState.QStatEnum;
 import com.ds.model.Session;
@@ -19,6 +20,8 @@ import com.ds.service.QuizProcessorService;
 import com.ds.service.ServiceResponse;
 
 public class Utils {
+	
+	private static final Logger log = Logger.getLogger(Utils.class.getName());
     
     public static boolean isValid(String val){
         if(val == null || val.isEmpty() || val.equalsIgnoreCase("undefined")){
@@ -31,7 +34,7 @@ public class Utils {
         String sessionInfo = null;
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                System.err.println("Cookie:" +cookie.getName());
+                log.info("Cookie:" +cookie.getName());
                 if (cookie.getName().equals("session")) {
                     sessionInfo = cookie.getValue();
                     break;
@@ -39,7 +42,7 @@ public class Utils {
             }
         }
         if(sessionInfo == null){
-            System.err.println("Cannot retrieve session cookie.");
+            log.info("Cannot retrieve session cookie.");
             return null;
         }
         return QuizProcessorService.getInstance().getSession(sessionInfo);
@@ -47,7 +50,7 @@ public class Utils {
     public static void respond(ServiceResponse result, HttpServletResponse response) throws IOException{        
         Gson gson = new Gson();
         String json = gson.toJson(result);  
-        System.err.println(json);
+        log.info(json);
         PrintWriter w = response.getWriter();
         response.setContentType("text/json");            
         w.print(json);
@@ -92,7 +95,7 @@ public class Utils {
         }
         
     }
-    public static void dumpModule(Module module) {
+    public static void dumpModule(ModCopy module) {
         // TODO Auto-generated method stub
         System.err.printf("name=%s, user=%s\n", module.getName(), module.getUser());
         for(QuestionState s: module.getQStates()){
@@ -102,7 +105,7 @@ public class Utils {
     public static boolean sessionCheck(HttpServletRequest request) {
         Session session = Utils.getSession(request.getCookies());
         if (session == null) {
-           System.err.println("Session is null");           
+           log.info("Session is null");           
            request.setAttribute("loginop", "in");
            return false;
         } else{            

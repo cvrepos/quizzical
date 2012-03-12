@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import org.mortbay.log.Log;
 import org.slim3.controller.Controller;
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.Filter;
@@ -21,12 +23,15 @@ import org.slim3.datastore.FilterCriterion;
 import org.slim3.datastore.InMemoryFilterCriterion;
 import org.slim3.datastore.S3QueryResultList;
 
+
 import com.ds.exception.UserManagementException;
+import com.ds.meta.ModuleMeta;
 import com.ds.meta.ObjectiveMeta;
 import com.ds.meta.QuestionMeta;
 import com.ds.meta.SessionMeta;
 import com.ds.meta.TagMeta;
 import com.ds.meta.UserMeta;
+import com.ds.model.Module;
 import com.ds.model.Objective;
 import com.ds.model.Option;
 import com.ds.model.Quiz;
@@ -37,6 +42,7 @@ import com.ds.model.Subjective;
 import com.ds.model.Tag;
 import com.ds.model.User;
 import com.ds.model.json.BasicSearch;
+import com.ds.model.json.KeyValueMap;
 import com.ds.model.json.MatchSearch;
 import com.ds.util.Utils;
 
@@ -49,7 +55,9 @@ import com.google.gson.Gson;
 
 public class QuizProcessorService {
 
-    private static final String ADMIN = "admin";
+
+	private static final Logger log = Logger.getLogger(QuizProcessorService.class.getName());
+	private static final String ADMIN = "admin";
     private static QuizProcessorService object = null;
     public static QuizProcessorService getInstance(){
         if(object == null){
@@ -293,7 +301,7 @@ public class QuizProcessorService {
         TagMeta t = TagMeta.get();
         return Datastore.query(t).filter(t.name.equal(name.trim().toLowerCase())).asSingle();
     }
-    public ServiceResponse addQuestion(String type, Long id, String question, Session session) throws ServletException {
+    public ServiceResponse addQuestion(String type, Long id, String question, Session session, String mid) throws ServletException {
         //check type of the quiz
         if(!this.quizTypeMap.containsKey(type)){
             throw new ServletException("type is invalid");
@@ -309,13 +317,14 @@ public class QuizProcessorService {
         }
         quiz.setCreatedBy(session.getUser());        
         //process tag to categorize 
+        int count = 0;
         if(quiz instanceof Question){            
             TagMeta m = TagMeta.get();
             for(String tag: quiz.getTags()){
-                Tag storedTag = Datastore.query(m).filter(m.name.equal(tag)).asSingle();
+                Tag storedTag = Datastore.query(m).filter(m.name.equal(tag)).asSingle();                
                 Transaction tx = Datastore.beginTransaction();
                 if(storedTag != null){                    
-                    storedTag.setCount(storedTag.getCount() +1 );
+                    storedTag.setCount(storedTag.getCount() +1 );                    
                     System.out.println("Updating tag:"+ tag);
                 }else{
                     storedTag = new Tag();
@@ -324,6 +333,9 @@ public class QuizProcessorService {
                     storedTag.setName(tag);
                     storedTag.setWeight(1);
                     System.out.println("Added tag:"+ tag);
+                }
+                if(storedTag.getName().equals(mid)){
+                	count = storedTag.getCount();
                 }
                 Datastore.put(storedTag);
                 tx.commit();
@@ -337,7 +349,20 @@ public class QuizProcessorService {
             tx.commit();     
         }
         response.setStatus(true);
-        response.setMetaData(Long.toString(quiz.getKey().getId()));
+        KeyValueMap map = new KeyValueMap();
+        map.put("code", "ADDED");
+        if(mid != null){
+			map.put("total", Integer.toString(count));
+			ModuleMeta m = ModuleMeta.get();
+			Key modKey = KeyFactory.createKey(m.getKind(), Long.parseLong(mid));
+			Module module = Datastore.query(m).filter(m.key.equal(modKey))
+					.asSingle();
+			module.setQuestionCount(count);
+			Transaction tx = Datastore.beginTransaction();
+			Datastore.put(module);
+			tx.commit();  
+        }
+        response.setMetaData(map.toJson());
         return response;
         
         
@@ -373,7 +398,7 @@ public class QuizProcessorService {
             result.setMetaData("invalid key");
         }else{
             if(q instanceof Objective){
-                return this.addQuestion("objective", lid, question, session);
+                return this.addQuestion("objective", lid, question, session, null);
             }            
             result.setStatus(false);
             result.setMetaData("cannot update");
@@ -513,5 +538,16 @@ public class QuizProcessorService {
         tx.commit();        
         
     }
+
+	public Module createModule(String mname, String user) {
+		log.info("Creating a module with name:" +mname);
+		Module module = new Module();
+		module.setName(mname);
+		module.setOwner(user);
+        Transaction tx = Datastore.beginTransaction();                               
+        Datastore.put(module);        
+        tx.commit();        
+        return module;
+	}
     
 }

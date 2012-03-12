@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -17,30 +18,33 @@ import org.slim3.util.RequestMap;
 
 import com.google.gson.Gson;
 
+import com.ds.model.Module;
 import com.ds.model.Session;
 import com.ds.model.Tag;
 import com.ds.model.Question;
 import com.ds.service.QuizProcessorService;
 import com.ds.service.ServiceResponse;
+import com.ds.util.StaticValues;
 import com.ds.util.Utils;
 
 public class ProcessController extends Controller {
 
     private QuizProcessorService service = QuizProcessorService.getInstance();
+    private static final Logger log = Logger.getLogger(ProcessController.class.getName());
     @Override
     public Navigation run() throws Exception {
-        System.err.println("Processing quiz");
+        log.info("Processing quiz");
         Session session = Utils.getSession(request.getCookies()); 
         if(session == null){
             return redirect("../login");
         }
         //based on the opcode process request
-        String op = (String) request.getAttribute("op");
+        String op = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "op");
         if(!Utils.isValid(op)){
             throw new ServletException("op cannot be empty");
         }
         if(op.equals("add")){
-            System.err.println("op=add");
+            log.info("op=add");
             //convert the question to appropriate type
             String type = (String) request.getAttribute("type");
             if(!Utils.isValid(type)){
@@ -49,11 +53,12 @@ public class ProcessController extends Controller {
             String question = (String) request.getAttribute("question");
             if(!Utils.isValid(question)){
                 throw new ServletException("question cannot be empty");
-            }            
-            respond(service.addQuestion(type, null, question, session));
+            }      
+            String mid = (String) request.getAttribute("mid");            
+            respond(service.addQuestion(type, null, question, session, mid));
                                  
         } else if(op.equals("delete")){
-            System.err.println("op=delete");
+            log.info("op=delete");
             //convert the question to appropriate type
             String key = (String) request.getAttribute("key");
             if(!Utils.isValid(key)){
@@ -61,7 +66,7 @@ public class ProcessController extends Controller {
             }                                    
             respond(service.deleteQuestion(key, session));            
         } else if (op.equals("update")){
-            System.err.println("op=update");
+            log.info("op=update");
             //convert the question to appropriate type
             String key = (String) request.getAttribute("key");
             if(!Utils.isValid(key)){
@@ -73,7 +78,7 @@ public class ProcessController extends Controller {
             }
             respond(service.updateQuestion(key, question, session));            
         }   else if(op.equals("gettags")){
-            System.err.println("gettags");
+            log.info("gettags");
             Iterator<Tag> tags = service.getTags(20);
             PrintWriter w = this.response.getWriter();
             response.setContentType("text/html");
@@ -89,7 +94,7 @@ public class ProcessController extends Controller {
             w.close();
             
         }else if(op.equals("query")){
-            System.err.println("op=query");            
+            log.info("op=query");            
             String type = (String) request.getAttribute("type");
             if(!Utils.isValid(type)){
                 throw new ServletException("search string cannot be empty");
@@ -103,7 +108,7 @@ public class ProcessController extends Controller {
         }else if(op.equals("download")){
             String type = (String) request.getAttribute("type");
             if(!Utils.isValid(type)){
-                System.err.println("type is null");
+                log.info("type is null");
                 type = "json";
             }
             download(session, type);
@@ -113,14 +118,25 @@ public class ProcessController extends Controller {
             String childs = (String) request.getAttribute("childs");
             service.addTag(parent, childs, false);
             return forward("addtag.jsp");
+        } else if(op.equals("create_mod")){
+            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "module");            
+            Module mod = service.createModule(mname, session.getUser());
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mod.getKey().getId());
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mod.getName());
+            return forward("module.jsp");
+        } else if(op.equals("update_mod")){
+            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mid);
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mname);
+            return forward("module.jsp");
         }
-        
         return null;
     }
     
     
     private void download(Session session, String type) throws IOException{
-        System.err.println("search");
+        log.info("search");
         String val = (String) request.getAttribute("val");
         if(!Utils.isValid(val)){
            return;
@@ -136,12 +152,12 @@ public class ProcessController extends Controller {
             String[] kvp = part.split(":");
             if(kvp.length == 1){
                 //wrong format
-                System.err.println("invalid search string:"+ part);
+                log.info("invalid search string:"+ part);
                 continue;
             }
             if(kvp[1].trim().isEmpty()) {
               //wrong format
-                System.err.println("invalid search string:"+ part);
+                log.info("invalid search string:"+ part);
                 continue;
             }
             key = kvp[0].trim();            
@@ -175,7 +191,7 @@ public class ProcessController extends Controller {
         Gson gson = new Gson();
         while(quizes.hasNext()){
             Question q = quizes.next();
-            System.err.println(gson.toJson(q));
+            log.info(gson.toJson(q));
             w.println(gson.toJson(q));
         }        
         w.close();
@@ -183,7 +199,7 @@ public class ProcessController extends Controller {
     private void respond(ServiceResponse result) throws IOException{        
         Gson gson = new Gson();
         String json = gson.toJson(result);  
-        System.err.println(json);
+        log.info(json);
         PrintWriter w = this.response.getWriter();
         response.setContentType("text/json");            
         w.print(json);

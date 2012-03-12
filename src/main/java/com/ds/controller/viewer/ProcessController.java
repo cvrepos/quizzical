@@ -5,13 +5,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
+import com.ds.meta.ModCopyMeta;
 import com.ds.meta.ModuleMeta;
+import com.ds.model.ModCopy;
 import com.ds.model.Module;
 import com.ds.model.Objective;
 import com.ds.model.Question;
@@ -27,10 +32,11 @@ import com.ds.util.Utils;
 public class ProcessController extends Controller {
 
     private QuizProcessorService service = QuizProcessorService.getInstance();
+    private static final Logger log = Logger.getLogger(ProcessController.class.getName());
 
     @Override
     public Navigation run() throws Exception {
-        System.err.println("invoked /viwer/process");
+        log.info("invoked /viwer/process");
         
         if(!Utils.sessionCheck(request)){
             String url = "../login?op=login";
@@ -47,7 +53,7 @@ public class ProcessController extends Controller {
         String action =
             (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "action");
         if (!Utils.isValid(action)) {
-            System.err.println("Action is invalid");
+            log.info("Action is invalid");
             return null;
         }
         if (action.equals("start")) {
@@ -67,29 +73,34 @@ public class ProcessController extends Controller {
     }
 
     private ServiceResponse onGet() {
-        System.err.println("In onGet");
+        log.info("In onGet");
 
         Session session = Utils.getSession(request.getCookies());
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-        if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        if (!Utils.isValid(mname)) {
+            log.info("Invalid module id");
+            return Utils.sendError("Invalid module id");
+        }
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         if (module == null) {
             return Utils.sendError("Unable to find module");
         }
 
-        System.err.println("Found a module");
+        log.info("Found a module");
         Utils.dumpModule(module);
         String qid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE +"qid");
         if (!Utils.isValid(qid)) {
-            System.err.println("Qid is invalid");
+            log.info("Qid is invalid");
             return Utils.sendError("Invalid qid");
         }
      // now we have to get the next question out of the module and
@@ -97,7 +108,14 @@ public class ProcessController extends Controller {
         List<QuestionState> qids = module.getQStates();
         int index = Integer.parseInt(qid);
         if (index  >= qids.size()) {
-            return Utils.sendSuccess("Completed all the questions");
+        	KeyValueMap map = new KeyValueMap();
+            map.put("code", "COMPLETED");            
+            map.put("mname", mname);
+            map.put("mid", module.getName());
+            ServiceResponse response = new ServiceResponse();
+            response.setStatus(true);
+            response.setMetaData(map.toJson());
+            return response;
         }
         
         QuestionState state = module.getQStates().get(index);
@@ -110,7 +128,8 @@ public class ProcessController extends Controller {
         KeyValueMap map = new KeyValueMap();
         map.put("question", q.getQuestion());
         map.put("qid",   Integer.toString(index));
-        map.put("mname", module.getName());
+        map.put("mname", mname);
+        map.put("mid", mid);
         map.put("ans1", q.getAnswers().get(0).getAns());
         map.put("ans2", q.getAnswers().get(1).getAns());
         map.put("ans3", q.getAnswers().get(2).getAns());
@@ -123,28 +142,33 @@ public class ProcessController extends Controller {
     }
     
     private ServiceResponse onSubmit() {
-        System.err.println("In onSubmit");
+        log.info("In onSubmit");
         Session session = Utils.getSession(request.getCookies());
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-        if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        if (!Utils.isValid(mname)) {
+            log.warning("Invalid module name");
+            return Utils.sendError("Invalid module name");
+        }
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         if (module == null) {
             return Utils.sendError("Unable to find module");
         }
 
-        System.err.println("Found a module");
+        log.info("Found a module");
         Utils.dumpModule(module);
         String qid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE +"qid");
         if (!Utils.isValid(qid)) {
-            System.err.println("Qid is invalid");
+            log.info("Qid is invalid");
             return Utils.sendError("Invalid qid");
         }
 
@@ -157,7 +181,7 @@ public class ProcessController extends Controller {
             // valid answers
             String[] vals = ans.split(",");
             if (vals.length > 4) {
-                System.err.println("Invalid answer set");
+                log.info("Invalid answer set");
                 return Utils.sendError("Invalid answer set");
             }
             // make a query to check if the answer is correct
@@ -166,11 +190,11 @@ public class ProcessController extends Controller {
             search.setId(id);
             boolean result = service.matchAnswers(search, session, null);
             if (result) {
-                System.err.println("Its a correct answer.");
+                log.info("Its a correct answer.");
                 state.setState(QuestionState.QStatEnum.CORRECT);
                 
             } else {
-                System.err.println("Its a wrong answer.");
+                log.info("Its a wrong answer.");
                 state.setState(QuestionState.QStatEnum.INCORRECT);
             }
         }else{
@@ -192,10 +216,11 @@ public class ProcessController extends Controller {
         if (index + 1 >= qids.size()) {
             map.put("code", "COMPLETED");
             //map.put("result", "QN_action=result&QN_mname=" + module.getName());
-            map.put("mname", module.getName());
+            map.put("mid", module.getName());
+            map.put("mname", mname);
         }else{
-            map.put("params" , "QN_action=get&QN_qid=" + Integer.toString(index + 1) + "&QN_mname=" 
-                + module.getName());
+            map.put("params" , "QN_action=get&QN_qid=" + Integer.toString(index + 1) + "&QN_mid=" 
+                + module.getName() + "&QN_mname=" + mname);
             map.put("code", "NEXT"); 
         }
         response.setStatus(true);
@@ -208,7 +233,7 @@ public class ProcessController extends Controller {
 
     private ServiceResponse onStart() {
         
-        System.err.println("Invoked onStart");
+        log.info("Invoked onStart");
 
         Session session = Utils.getSession(request.getCookies());
         if (session == null) {
@@ -216,17 +241,22 @@ public class ProcessController extends Controller {
         }
         String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+            log.warning("Invalid module name");
+            return Utils.sendError("Invalid module name");
+        }
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy modClone =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
-        if (module != null) {
-            List<QuestionState> ansStates = module.getQStates();
+        if (modClone != null) {
+            List<QuestionState> ansStates = modClone.getQStates();
             // check if force start enabled - in such case reset the question
             // state
             String force =
@@ -248,11 +278,17 @@ public class ProcessController extends Controller {
                     map.put("code", "ALREADY_STARTED");
                     map.put(
                         "reset",
-                        "QN_action=reset&QN_mname=" + module.getName());
+                        "QN_action=reset&QN_mid=" 
+                        + modClone.getName()
+                        + "&QN_mname=" 
+                        + mname                        
+                        );
                     map.put(
                         "resume",
-                        "QN_action=get&QN_mname="
-                            + module.getName()
+                        "QN_action=get&QN_mid="
+                            + modClone.getName()
+                            + "&QN_mname="
+                            + mname
                             + "&QN_qid="
                             + Utils.getFirstUnattempted(ansStates));
                     response.setMetaData(map.toJson());
@@ -261,14 +297,14 @@ public class ProcessController extends Controller {
             }
             
         } else {
-            module = new Module();
+            modClone = new ModCopy();
             Iterator<Question> it = service.getQuizByTag(mname);
-            module.setName(mname);
-            module.setUser(session.getUser());
-            List<QuestionState> qStates = module.getQStates();
+            modClone.setName(mname);
+            modClone.setUser(session.getUser());
+            List<QuestionState> qStates = modClone.getQStates();
             while (it.hasNext()) {
                 Question q = it.next();
-                System.err.printf("Loaded qid=%d\n", q.getKey().getId());
+                log.info("Loaded qid=" + q.getKey().getId());
                 qStates.add(new QuestionState(q.getKey().getId(), 
                     QuestionState.QStatEnum.INITIALIZED));
             }
@@ -278,14 +314,23 @@ public class ProcessController extends Controller {
         
         //save this module/module update to DataStore
         Transaction tx = Datastore.beginTransaction();
+        Datastore.put(modClone);
+        tx.commit();
+        tx = Datastore.beginTransaction();
+        
+        //obtain the Module
+        ModuleMeta mm = ModuleMeta.get();
+        Key modKey = KeyFactory.createKey(mm.getKind(), Long.parseLong(mid));
+        Module module = Datastore.query(mm).filter(mm.key.equal(modKey)).asSingle();
+        module.setCloneCount(module.getCloneCount() + 1);
         Datastore.put(module);
         tx.commit();
-        Utils.dumpModule(module);
+        Utils.dumpModule(modClone);
         
         KeyValueMap map = new KeyValueMap();
         map.put("message", "Successfully started the module");
-        map.put("params" , "QN_action=get&QN_qid=0&QN_mname=" 
-            + module.getName());
+        map.put("params" , "QN_action=get&QN_qid=0&QN_mname" + mname + "&QN_mid=" 
+            + modClone.getName());
         map.put("code", "NEXT");            
         ServiceResponse response = new ServiceResponse();
         response.setStatus(true);
@@ -296,21 +341,26 @@ public class ProcessController extends Controller {
     
     private ServiceResponse onReset() {
         
-        System.err.println("In onReset()");
+        log.info("In onReset()");
         Session session = Utils.getSession(request.getCookies());
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-        if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        if (!Utils.isValid(mname)) {
+            log.info("Invalid module name");
+            return Utils.sendError("Invalid module name");
+        }
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();
@@ -325,8 +375,8 @@ public class ProcessController extends Controller {
             tx.commit();
             
             map.put("message", "Successfully started the module");
-            map.put("params" , "QN_action=get&QN_qid=0&QN_mname=" 
-                + module.getName());
+            map.put("params" , "QN_action=get&QN_qid=0&QN_mid=" 
+                + module.getName() + "&QN_mname=" + mname);
             map.put("code", "NEXT");            
             response.setStatus(true);
         }else{           
@@ -340,21 +390,26 @@ public class ProcessController extends Controller {
     
     private ServiceResponse onResult() {
         
-        System.err.println("In onResult()");
+        log.info("In onResult()");
         Session session = Utils.getSession(request.getCookies());
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-        if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        if (!Utils.isValid(mname)) {
+            log.info("Invalid module name");
+            return Utils.sendError("Invalid module name");
+        }
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();
@@ -388,21 +443,26 @@ public class ProcessController extends Controller {
     }
     private ServiceResponse onModuleAnalyze() {
         
-        System.err.println("In onModuleAnalyze()");
+        log.info("In onModuleAnalyze()");
         Session session = Utils.getSession(request.getCookies());
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-        if (!Utils.isValid(mname)) {
-            System.err.println("Invalid module id");
+        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        if (!Utils.isValid(mid)) {
+            log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        ModuleMeta m = ModuleMeta.get();
-        Module module =
+        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        if (!Utils.isValid(mname)) {
+            log.warning("Invalid module name");
+            return Utils.sendError("Invalid module name");
+        }
+        ModCopyMeta m = ModCopyMeta.get();
+        ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mname), m.user.equal(session.getUser()))
+                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();
@@ -413,6 +473,9 @@ public class ProcessController extends Controller {
             for(QuestionState s: qStates){
                 Question q = service.getQuizByKey(s.getQid());
                 for(String tag: q.getTags()){
+                	if(tag.equals(mid)){
+                		continue;
+                	}
                     if(tagCounts.containsKey("tag_"+ tag)){
                         int counts = tagCounts.get("tag_"+ tag);
                         tagCounts.put("tag_"+ tag, ++counts);
@@ -426,7 +489,8 @@ public class ProcessController extends Controller {
                 String tag = keys.next();
                 map.put(tag, Integer.toString(tagCounts.get(tag)));
             }                        
-            map.put("mname", module.getName());
+            map.put("mname", mname);
+            map.put("mid", mid);
             map.put("code", "MODULE_ANALYSIS");
         }else{           
             response.setStatus(false);
