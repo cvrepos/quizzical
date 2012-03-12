@@ -7,7 +7,7 @@ import static org.hamcrest.CoreMatchers.*;
 
 public class IndexControllerTest extends ControllerTestCase {
 
-    @Test
+    //@Test
     public void run() throws Exception {
         tester.start("/adduser/");
         IndexController controller = tester.getController();

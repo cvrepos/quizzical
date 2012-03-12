@@ -20,19 +20,19 @@ public class ModCopy implements Serializable {
     @Attribute(primaryKey = true)
     private Key key;
     
-    private String name;
+    private String modId;
     private String user;
     
     @Attribute(lob = true)
     private List<QuestionState> qStates = new LinkedList<QuestionState>();
     
     
-    public String getName() {
-        return name;
+    public String getModId() {
+        return modId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setModId(String name) {
+        this.modId = name;
     }
 
     public String getUser() {

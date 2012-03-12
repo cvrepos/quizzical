@@ -97,7 +97,7 @@ public class Utils {
     }
     public static void dumpModule(ModCopy module) {
         // TODO Auto-generated method stub
-        System.err.printf("name=%s, user=%s\n", module.getName(), module.getUser());
+        System.err.printf("name=%s, user=%s\n", module.getModId(), module.getUser());
         for(QuestionState s: module.getQStates()){
             System.err.printf("qid=%d, state=%s\n", s.getQid(), s.getState().name());
         }

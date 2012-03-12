@@ -73,6 +73,7 @@ public class QuizProcessorService {
     
     public void init()
     {
+    	
         quizTypeMap.put("objective", new Objective());
         //quizTypeMap.put("subjective", new Subjective());
     }

@@ -128,10 +128,10 @@
 <div id='question_container' >
 	<p id='question'></p>
 	<ul class='answers'>
-		<input type='checkbox'  id=c1>(A)<li id='ans1'></li></input>
-		<input type='checkbox'  id=c2>(B)<li id='ans2'></li></input>
-		<input type='checkbox'  id=c3>(C)<li id='ans3'></li></input>
- 		<input type='checkbox'  id=c4>(D)<li id='ans4'></li></input>
+		<input type='checkbox'  id=c1>(A)<li id='ans1'></li><br/></input>
+		<input type='checkbox'  id=c2>(B)<li id='ans2'></li><br/></input>
+		<input type='checkbox'  id=c3>(C)<li id='ans3'></li><br/></input>
+ 		<input type='checkbox'  id=c4>(D)<li id='ans4'></li><br/></input>
 	</ul>
 	<input type='hidden' id='qid' value='' />
 	<input type='hidden' id='mname' value='' />

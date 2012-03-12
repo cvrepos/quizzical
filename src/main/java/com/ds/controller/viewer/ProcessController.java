@@ -90,7 +90,7 @@ public class ProcessController extends Controller {
         ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         if (module == null) {
             return Utils.sendError("Unable to find module");
@@ -111,7 +111,7 @@ public class ProcessController extends Controller {
         	KeyValueMap map = new KeyValueMap();
             map.put("code", "COMPLETED");            
             map.put("mname", mname);
-            map.put("mid", module.getName());
+            map.put("mid", module.getModId());
             ServiceResponse response = new ServiceResponse();
             response.setStatus(true);
             response.setMetaData(map.toJson());
@@ -158,7 +158,7 @@ public class ProcessController extends Controller {
         ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         if (module == null) {
             return Utils.sendError("Unable to find module");
@@ -216,11 +216,11 @@ public class ProcessController extends Controller {
         if (index + 1 >= qids.size()) {
             map.put("code", "COMPLETED");
             //map.put("result", "QN_action=result&QN_mname=" + module.getName());
-            map.put("mid", module.getName());
+            map.put("mid", module.getModId());
             map.put("mname", mname);
         }else{
             map.put("params" , "QN_action=get&QN_qid=" + Integer.toString(index + 1) + "&QN_mid=" 
-                + module.getName() + "&QN_mname=" + mname);
+                + module.getModId() + "&QN_mname=" + mname);
             map.put("code", "NEXT"); 
         }
         response.setStatus(true);
@@ -253,7 +253,7 @@ public class ProcessController extends Controller {
         ModCopy modClone =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         if (modClone != null) {
             List<QuestionState> ansStates = modClone.getQStates();
@@ -279,14 +279,14 @@ public class ProcessController extends Controller {
                     map.put(
                         "reset",
                         "QN_action=reset&QN_mid=" 
-                        + modClone.getName()
+                        + modClone.getModId()
                         + "&QN_mname=" 
                         + mname                        
                         );
                     map.put(
                         "resume",
                         "QN_action=get&QN_mid="
-                            + modClone.getName()
+                            + modClone.getModId()
                             + "&QN_mname="
                             + mname
                             + "&QN_qid="
@@ -297,9 +297,12 @@ public class ProcessController extends Controller {
             }
             
         } else {
-            modClone = new ModCopy();
-            Iterator<Question> it = service.getQuizByTag(mname);
-            modClone.setName(mname);
+        	Iterator<Question> it = service.getQuizByTag(mid);
+        	if(!it.hasNext()){
+        		return Utils.sendError("Module does not have any content!");
+        	}
+            modClone = new ModCopy();            
+            modClone.setModId(mid);
             modClone.setUser(session.getUser());
             List<QuestionState> qStates = modClone.getQStates();
             while (it.hasNext()) {
@@ -329,8 +332,8 @@ public class ProcessController extends Controller {
         
         KeyValueMap map = new KeyValueMap();
         map.put("message", "Successfully started the module");
-        map.put("params" , "QN_action=get&QN_qid=0&QN_mname" + mname + "&QN_mid=" 
-            + modClone.getName());
+        map.put("params" , "QN_action=get&QN_qid=0&QN_mname=" + mname + "&QN_mid=" 
+            + mid);
         map.put("code", "NEXT");            
         ServiceResponse response = new ServiceResponse();
         response.setStatus(true);
@@ -360,7 +363,7 @@ public class ProcessController extends Controller {
         ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();
@@ -376,7 +379,7 @@ public class ProcessController extends Controller {
             
             map.put("message", "Successfully started the module");
             map.put("params" , "QN_action=get&QN_qid=0&QN_mid=" 
-                + module.getName() + "&QN_mname=" + mname);
+                + mid + "&QN_mname=" + mname);
             map.put("code", "NEXT");            
             response.setStatus(true);
         }else{           
@@ -409,7 +412,7 @@ public class ProcessController extends Controller {
         ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();
@@ -431,7 +434,7 @@ public class ProcessController extends Controller {
             map.put("ncorrect", Integer.toString(corrects));
             map.put("nwrong", Integer.toString(wrongs));
             map.put("nunanswered", Integer.toString(unanswered));
-            map.put("mname", module.getName());
+            map.put("mname", module.getModId());
             map.put("code", "RESULTS");
         }else{           
             response.setStatus(false);
@@ -462,7 +465,7 @@ public class ProcessController extends Controller {
         ModCopy module =
             Datastore
                 .query(m)
-                .filter(m.name.equal(mid), m.user.equal(session.getUser()))
+                .filter(m.modId.equal(mid), m.user.equal(session.getUser()))
                 .asSingle();
         ServiceResponse response = new ServiceResponse();
         KeyValueMap map = new KeyValueMap();

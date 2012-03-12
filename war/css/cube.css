@@ -164,7 +164,14 @@ footer {
 ul.answers 
 {
     list-style-type: none;
-    padding: 0;
+    padding: 0px;
+    margin: 0;
+    display:inline;
+}
+ul.answers li
+{
+    display:inline;
+    padding: 4px;
     margin: 0;
 }
 
