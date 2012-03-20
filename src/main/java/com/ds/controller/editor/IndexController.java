@@ -35,9 +35,23 @@ public class IndexController extends Controller {
         List<String> modJson  = new LinkedList<String>();
         for(Module module:modules){
         	KeyValueMap map = new KeyValueMap();
-        	map.put("mname", module.getName());
+        	map.put("mname", module.getName());        	
         	map.put("mid", module.getKey().getId());
         	map.put("total", module.getQuestionCount());
+        	if(module.getParent() != null){
+        		map.put("parent", module.getParent());
+        	}
+        	if(module.getPrevSibling() != null){
+        		map.put("prevSibling", module.getPrevSibling());
+        	}
+        	if(module.getFirstChild() != null){
+        		map.put("firstChild", module.getFirstChild());
+        	}
+        	if(module.getNextSibling() != null){
+        		map.put("nextSibling", module.getNextSibling());
+        	}
+        	map.put("questionCount", module.getQuestionCount());
+        	map.put("cloneCount", module.getCloneCount());
         	modJson.add(map.toJson());
         }
         request.setAttribute("modules", modJson);     

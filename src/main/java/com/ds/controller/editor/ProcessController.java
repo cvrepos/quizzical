@@ -119,8 +119,22 @@ public class ProcessController extends Controller {
             service.addTag(parent, childs, false);
             return forward("addtag.jsp");
         } else if(op.equals("create_mod")){
-            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "module");            
-            Module mod = service.createModule(mname, session.getUser());
+            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "module");
+            String description = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "description");
+            String parent = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "parent");
+            String prevSibling = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "prevSibling");
+            Module mod = null;
+            if(parent != null && !parent.equals("none") ){    
+            	log.info("calling createModuleAsChild");
+            	mod = service.createModuleAsChild(mname, description, Long.parseLong(parent), session.getUser());
+            }
+            else if(prevSibling != null && !prevSibling.equals("none")){
+            	log.info("calling createModuleAsSibling");
+            	mod = service.createModuleAsSibling(mname, description, Long.parseLong(prevSibling), session.getUser());
+            } else {
+            	log.info("calling createModule");
+            	mod = service.createModule(mname, description,session.getUser());
+            }
             request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mod.getKey().getId());
             request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mod.getName());
             return forward("module.jsp");

@@ -540,14 +540,84 @@ public class QuizProcessorService {
         
     }
 
-	public Module createModule(String mname, String user) {
+    public Module createModule(String mname, String description, String user) {
 		log.info("Creating a module with name:" +mname);
 		Module module = new Module();
 		module.setName(mname);
 		module.setOwner(user);
+		module.setDescription(description);
+		module.setParent(null);		
+		module.setNextSibling(null);
+		module.setPrevSibling(null);
+		Transaction tx = Datastore.beginTransaction();                               
+        Datastore.put(module);                  
+        tx.commit();
+        return module;
+	}
+	public Module createModuleAsChild(String mname, String description, Long parent, String user) {
+		log.info("Creating a module with name:" +mname);
+		ModuleMeta m = ModuleMeta.get();
+		Module parentModule = null;		
+		if(parent != null){
+			Key key = KeyFactory.createKey(m.getKind(), parent);
+			parentModule = Datastore.query(m).filter(m.key.equal(key)).asSingle();
+			if(parentModule == null){
+				log.warning("Parent module :"+ parent + " is invalid");
+				return null;
+			}			
+		}
+		Module module = new Module();
+		module.setName(mname);
+		module.setOwner(user);
+		module.setDescription(description);
+		module.setParent(parent);		
+		module.setNextSibling(parentModule.getFirstChild());
+		module.setPrevSibling(null);
+		
+		
+		Transaction tx = Datastore.beginTransaction();                               
+        Datastore.put(module);                
+        tx.commit();  
+        tx = Datastore.beginTransaction();
+        parentModule.setFirstChild(module.getKey().getId());
+        Datastore.put(parentModule);  
+        tx.commit();                 
+        return module;
+	}
+	public Module createModuleAsSibling(String mname, String description, Long prevSibling, String user) {
+		log.info("Creating a module with name:" +mname);
+		ModuleMeta m = ModuleMeta.get();		
+		Module prevSiblingModule = null;
+		
+		if(prevSibling != null){
+			Key key = KeyFactory.createKey(m.getKind(), prevSibling);
+			prevSiblingModule = Datastore.query(m).filter(m.key.equal(key)).asSingle();
+			if(prevSiblingModule == null){
+				log.warning("Prev sibling module :"+ prevSibling + " is invalid");
+				return null;
+			}
+			if(prevSiblingModule.getParent() == null){
+				log.warning("Prev sibling module :"+ prevSibling + " is a root module. Cannot add sibling.");
+				return null;
+			}
+		}
+		Module module = new Module();
+		module.setName(mname);
+		module.setOwner(user);
+		module.setDescription(description);
+		module.setParent(prevSiblingModule.getParent());
+		module.setPrevSibling(prevSibling);
+		module.setNextSibling(prevSiblingModule.getNextSibling());
+			
+		
         Transaction tx = Datastore.beginTransaction();                               
         Datastore.put(module);        
-        tx.commit();        
+        tx.commit();
+        
+        tx = Datastore.beginTransaction();                    
+        prevSiblingModule.setNextSibling(module.getKey().getId());
+        Datastore.put(prevSiblingModule);                
+        tx.commit();
         return module;
 	}
     

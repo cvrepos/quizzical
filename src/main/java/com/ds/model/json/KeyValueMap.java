@@ -23,8 +23,8 @@ public class KeyValueMap {
     public String toJson(){        
         return gson.toJson(map, collectionType);
     }
-	public void put(String key, long id) {
-		map.put(key, Long.toString(id));		
+	public void put(String key, long n) {
+		map.put(key, Long.toString(n));		
 	}
     
 }

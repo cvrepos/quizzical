@@ -20,16 +20,66 @@
 			modJsons.push(modJson);
 			</c:forEach>
 			$(function(){
-				 $.each(modJsons, function(index, module){		 
-					 $("#modules").append("<li><a href='process?QN_op=update_mod&QN_mid=" 
-							 + module.mid + "&QN_mname=" + module.mname +"'>" + module.mname + "</a> Total Questions: " + module.total + " </li> ");
-				 });
+				 var createModuleHtml = function(module) {
+					 var content = "<li id='"
+							 + module.mid +"'>" 
+							 +"<a href='./process?QN_op=update_mod&QN_mname="+module.mname+"&QN_mid="+ module.mid +"'>" 
+							 + module.mname + " (Q:"+ module.questionCount + ", D:"+ module.cloneCount + ")</a><ul/></li>";					 
+					 return content;
+					 
+				 };
+				 var options = $(".options");
+				 $.each(modJsons, function(index, module){		 					 
+					 console.log(">>> Start module:" + module.mname);
+					 if(!module.parent){
+						 //its a root node
+						 console.log("root node:" + module.mname);
+						 $("#root_modules").append(createModuleHtml(module));						 						 
+					 }					 
+					 else{
+						 //non-root node
+						 console.log("non-root node:" + module.mname);
+						 if(!module.prevSibling){
+							 console.log("No prevSibling of:" + module.mname);
+							 //check if parent ul is already created
+							 if($("#" + module.parent).length <= 0){
+								 //add parent to temporary roots
+								 console.log("Parent module :" + module.parent + " has not been added.");
+								 $("#temp_roots").append(createModuleHtml(module));								 
+							 }
+							 //check if its in the temp roots - delete it if exists
+							 if($("#" + module.mid).parent().attr("id") == 'temp_root'){
+								 console.log("Removing module:" + module.mname + " from temp root");
+								 $("#" + module.mid).remove();
+							 }	 							 
+							 if($("#" + module.parent +" >ul").length >0 ){
+								 console.log("Found a parent module. Adding to it");
+							 	 $("#" + module.parent +" >ul").prepend( createModuleHtml(module));
+							 }else{
+								 console.log("Unable to find parent:" + module.parent);
+							 }
+						 }else{
+							 console.log("PrevSibling is :" + module.prevSibling);
+							 $(createModuleHtml(module)).insertAfter($("#"+module.prevSibling));
+						 }
+					 }
+					 //fix the first child if it is not already in correct place
+					 if($("#" + module.firstChild).parent().attr("id") == 'temp_root'){
+						 //val $nodeContent = $("#" + module.firstChild).html();
+						 console.log("Fixing firstChild :" + module.firstChild);
+						 $('#' + module.mname + " >ul").append( $("#" + module.firstChild).html());
+					 }
+					 
+					 options.append($("<option />").val(module.mid).text(module.mname));
+					 console.log("<<< End module:" + module.mname);
+				 });				 
 			});
 						
 			$('#module-form').hide();		
 			$('#create-button').click( function() {
 				$('#module-form').show();	
 			});
+			
 		});
 		</script>
 </head>
@@ -41,9 +91,12 @@
 
 <p>Welcome to the quiz editor. </p>
 <p>These are your modules:</p>
-<ul id='modules'>
-
+<ul id='root_modules'>
 </ul>
+
+<ul id='temp_modules'>
+</ul>
+
 
 <ul>
 	<li><input type="button" id='create-button' value='Create Module'/></li>
@@ -51,9 +104,19 @@
 </ul>
 
 <div id = 'module-form'>
- 	<form method='post' action="./process">
+ 	<form  action="./process">
  		<label for='QN_module'>Enter the module name:</label>
- 		<input type='text' name='QN_module'></input>
+ 		<input type='text' name='QN_module'></input><br/>
+ 		<label for='QN_description'>Briefly describe the module:</label>
+ 		<textarea name='QN_description'></textarea><br/>
+ 		<label for='QN_parent'>Select a parent module:</label>
+ 		<select name='QN_parent' class='options'>
+ 			<option value='none'>None</option>
+ 		</select>
+ 		<label for='QN_prevSibling'>Or select a previous sibling module:</label>
+ 		<select name='QN_prevSibling' class='options'>
+ 			<option value='none'>None</option>
+ 		</select>
  		<input type='hidden' name='QN_op' value='create_mod'></input>
  		<input type='submit' name='submit' value='submit'/>
  	</form>

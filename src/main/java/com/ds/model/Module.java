@@ -12,6 +12,11 @@ public class Module implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public enum State{
+    	DRAFT,
+    	PUBLISHED,
+    	INREVIEW
+    }
     @Attribute(primaryKey = true)
     private Key key;
 
@@ -19,13 +24,60 @@ public class Module implements Serializable {
     private Long version;
     private String owner;
     private String name;
+    //navigation
+    private Long parent = null;
+    private Long prevSibling = null;
+    private Long firstChild = null;    
+    private Long nextSibling = null;
+    
     private long questionCount = 0;
     private long cloneCount = 0;
     private int  ratings = 1;
     private String description;    
-
+    private State state = State.DRAFT;
     
-    public String getOwner() {
+    
+    public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	public Long getParent() {
+		return parent;
+	}
+
+	public void setParent(Long parent) {
+		this.parent = parent;
+	}
+
+	public Long getPrevSibling() {
+		return prevSibling;
+	}
+
+	public void setPrevSibling(Long prevSibling) {
+		this.prevSibling = prevSibling;
+	}
+
+	public Long getFirstChild() {
+		return firstChild;
+	}
+
+	public void setFirstChild(Long firstChild) {
+		this.firstChild = firstChild;
+	}
+
+	public Long getNextSibling() {
+		return nextSibling;
+	}
+
+	public void setNextSibling(Long nextSibling) {
+		this.nextSibling = nextSibling;
+	}
+
+	public String getOwner() {
 		return owner;
 	}
 
@@ -140,4 +192,6 @@ public class Module implements Serializable {
         }
         return true;
     }
+
+	
 }
