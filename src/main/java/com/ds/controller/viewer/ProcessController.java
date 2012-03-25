@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
+
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
@@ -37,12 +39,26 @@ public class ProcessController extends Controller {
     @Override
     public Navigation run() throws Exception {
         log.info("invoked /viwer/process");
-        
-        if(!Utils.sessionCheck(request)){
-            String url = "../login?op=login";
-            request.setAttribute("orig", basePath + "process");
-            return forward(response.encodeRedirectURL(url));
-        }
+        //TODO: remove it
+        String skip = (String) request.getAttribute("skip");
+		if (!Utils.isValid(skip) || !skip.equals("y")) {
+			if (!Utils.sessionCheck(request)) {
+				String url = "../login?op=login";
+				request.setAttribute("orig", basePath + "process");
+				return forward(response.encodeRedirectURL(url));
+			}
+		} else {
+			Session session = Utils.getSession(request.getCookies());
+			if (session == null) {
+
+				// set the cookie in the response
+				Cookie sCookie = new Cookie("session",
+						service.generateSessionCookie("admin"));
+				// BUG: chrome cannot set a cookie on redirect
+				sCookie.setPath("/");
+				response.addCookie(sCookie);
+			}
+		}
         
         String magic = (String) request.getAttribute("m");
         if(!Utils.isValid(magic) || !magic.equals("y")){

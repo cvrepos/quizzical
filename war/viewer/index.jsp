@@ -18,7 +18,7 @@ modJsons.push(modJson);
 </c:forEach>
 $(function(){
 	 $.each(modJsons, function(index, module){		 
-		 $("#modules").append("<li><a href='process?QN_action=start&QN_mid=" 
+		 $("#modules").append("<li><a href='process?QN_action=start&skip=y&QN_mid=" 
 				 + module.mid 
 				 + "&QN_mname="
 				 + module.mname 

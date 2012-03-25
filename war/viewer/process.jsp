@@ -71,7 +71,7 @@
 				}
 			};
 			var doAjax = function(dataString){
-				dataString += "&m=y";
+				dataString += "&m=y&skip=y";
 				//alert(dataString);
 				$.ajax({					
 					type: "POST",

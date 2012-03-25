@@ -43,7 +43,16 @@ public class ProcessController extends Controller {
         if(!Utils.isValid(op)){
             throw new ServletException("op cannot be empty");
         }
-        if(op.equals("add")){
+        if(op.equals("process")){        	
+        	//based on the state of the module - operations will be performed
+        	log.info("In op=process");
+        	String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mid);
+            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mname);
+            return forward("modproc.jsp");
+        }                
+        else if(op.equals("add")){
             log.info("op=add");
             //convert the question to appropriate type
             String type = (String) request.getAttribute("type");
@@ -77,7 +86,7 @@ public class ProcessController extends Controller {
                 throw new ServletException("question cannot be empty");
             }
             respond(service.updateQuestion(key, question, session));            
-        }   else if(op.equals("gettags")){
+        }  else if(op.equals("gettags")){
             log.info("gettags");
             Iterator<Tag> tags = service.getTags(20);
             PrintWriter w = this.response.getWriter();

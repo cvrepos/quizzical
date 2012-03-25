@@ -52,6 +52,9 @@ public class IndexController extends Controller {
         	}
         	map.put("questionCount", module.getQuestionCount());
         	map.put("cloneCount", module.getCloneCount());
+        
+        	map.put("state", module.getState() == null ? "draft": 
+        		module.getState().name().toLowerCase());
         	modJson.add(map.toJson());
         }
         request.setAttribute("modules", modJson);     

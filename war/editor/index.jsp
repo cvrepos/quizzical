@@ -9,9 +9,16 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<title>Welcome to Quiz Editor</title>
 		<link type="text/css" href="../css/cube.css" rel="stylesheet" />
-		 
-		<script type="text/javascript" src="../js/jquery-1.6.2.min.js"></script>
-		<script type="text/javascript" src="../js/jquery-ui-1.8.16.custom.min.js"></script>
+		<link type="text/css" href="../css/jquery-ui.custom.css" rel="stylesheet" />
+		<link type="text/css" href="../css/jquery.treeview.css" rel="stylesheet" />	
+					 
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.treeview.js"></script>
+		
+		<style>
+		
+		</style>
 		<script type="text/javascript">
 		$(function(){
 			var modJsons  = new Array();
@@ -19,7 +26,7 @@
 			modJson = ${m};
 			modJsons.push(modJson);
 			</c:forEach>
-			$(function(){
+			 
 				 var createModuleHtml = function(module) {
 					 var content = "<li id='"
 							 + module.mid +"'>" 
@@ -28,13 +35,41 @@
 					 return content;
 					 
 				 };
-				 var options = $(".options");
+				 //for each possible state type create a tab
+				 //should be replaced with ajax
+				 var states = new Array();
+				 states.push("draft");
+				 states.push("inreview");
+				 states.push("suggested");
+				 states.push("rejected");
+				 states.push("accepted");				 
+				 states.push("published");
+				 $.each(states, function(index, state){
+					 $("#tabs > ul").append("<li><a href='#tabs-"+ (index + 1) + "'> " 
+							 + state + "(0)</a></li>");
+					 $("#tabs").append("<div id='tabs-" + 
+							 + (index + 1) +"'>"
+							 + "<ul id='"+state+"_root_modules'></ul>"
+							 + "<ul id='"+state+"_temp_modules'></ul>" 
+							 + "</div>");					 				     					 
+				 });
+	
+				 var options = $(".options");				 
 				 $.each(modJsons, function(index, module){		 					 
 					 console.log(">>> Start module:" + module.mname);
 					 if(!module.parent){
 						 //its a root node
 						 console.log("root node:" + module.mname);
-						 $("#root_modules").append(createModuleHtml(module));						 						 
+						 $("#" + module.state + "_root_modules").append(createModuleHtml(module));	
+						 //update the count on the tab
+						 var index = $.inArray(module.state, states);
+						 if(index != -1){
+							 var $value = $("a[href='#tabs-" + (index+1) + "']").html();
+							 var num = ($value.match(/.*([0-9]+)/)[1]);
+							 num++;
+							 $("a[href='#tabs-" + (index+1) + "']").html(module.state + "(" + num +")");
+							 						 
+						 }				 						 
 					 }					 
 					 else{
 						 //non-root node
@@ -45,7 +80,7 @@
 							 if($("#" + module.parent).length <= 0){
 								 //add parent to temporary roots
 								 console.log("Parent module :" + module.parent + " has not been added.");
-								 $("#temp_roots").append(createModuleHtml(module));								 
+								 $("#" + module.state + "_temp_roots").append(createModuleHtml(module));								 
 							 }
 							 //check if its in the temp roots - delete it if exists
 							 if($("#" + module.mid).parent().attr("id") == 'temp_root'){
@@ -73,30 +108,39 @@
 					 options.append($("<option />").val(module.mid).text(module.mname));
 					 console.log("<<< End module:" + module.mname);
 				 });				 
-			});
+			
 						
 			$('#module-form').hide();		
 			$('#create-button').click( function() {
 				$('#module-form').show();	
 			});
-			
+			$("#tabs").tabs();
+			$.each(states, function(index, state){
+				 $("#"+state+"_root_modules").treeview({
+					 	persist: "location",
+						collapsed: true,
+						unique: true
+				 });
+				 				 			 				     					 
+			});
 		});
 		</script>
 </head>
 <body>
-<h1>Career Vision</h1>
+<h1>take.a.test</h1>
 <jsp:include page="../common/header.jsp" />
 <ul class="toolbar" id="tools">  	
 </ul>
 
 <p>Welcome to the quiz editor. </p>
 <p>These are your modules:</p>
-<ul id='root_modules'>
-</ul>
 
-<ul id='temp_modules'>
-</ul>
 
+
+<div id="tabs">	
+	<ul>
+	</ul>
+</div>
 
 <ul>
 	<li><input type="button" id='create-button' value='Create Module'/></li>

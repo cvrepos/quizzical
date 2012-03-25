@@ -12,11 +12,7 @@ public class Module implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public enum State{
-    	DRAFT,
-    	PUBLISHED,
-    	INREVIEW
-    }
+    
     @Attribute(primaryKey = true)
     private Key key;
 
