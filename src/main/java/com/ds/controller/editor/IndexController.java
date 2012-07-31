@@ -37,6 +37,7 @@ public class IndexController extends Controller {
         	KeyValueMap map = new KeyValueMap();
         	map.put("mname", module.getName());        	
         	map.put("mid", module.getKey().getId());
+        	map.put("description", module.getDescription());
         	map.put("total", module.getQuestionCount());
         	if(module.getParent() != null){
         		map.put("parent", module.getParent());

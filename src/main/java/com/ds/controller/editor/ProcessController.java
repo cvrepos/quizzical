@@ -154,6 +154,36 @@ public class ProcessController extends Controller {
             request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mname);
             return forward("module.jsp");
         }
+        else if(op.equals("load_module")){
+        	log.info("load_module");
+            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+            Utils.respond(service.loadModule(mid), response);
+            return null;
+        }
+        else if(op.equals("update_module_name")){
+        	log.info("update_module_name");
+            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname"); 
+            Module module = service.getModule(mid);
+            if(module == null){
+            	Utils.sendError("Unable to find module");
+            }
+            module.setName(mname);
+            Utils.respond(service.updateModule(module), response);
+            return null;
+        }
+        else if(op.equals("update_module_description")){
+        	log.info("update_module_description");
+            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+            String description = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "description"); 
+            Module module = service.getModule(mid);
+            if(module == null){
+            	Utils.sendError("Unable to find module");
+            }
+            module.setDescription(description);
+            Utils.respond(service.updateModule(module), response);
+            return null;
+        }
         return null;
     }
     

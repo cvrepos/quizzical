@@ -15,8 +15,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import org.mortbay.log.Log;
-import org.slim3.controller.Controller;
+
 import org.slim3.datastore.Datastore;
 import org.slim3.datastore.Filter;
 import org.slim3.datastore.FilterCriterion;
@@ -147,8 +146,11 @@ public class QuizProcessorService {
         Key k = KeyFactory.createKey(QuestionMeta.get().getKind(), id);
         return Datastore.query(t).filter(t.key.equal(k)).asSingle();
     }
-    public Iterator<Question> getQuizByTag(String tag) {        
+    public Iterator<Question> getQuizItByTag(String tag) {        
         return Datastore.query(t).filterInMemory(t.tags.contains(tag)).asList().iterator();
+    }
+    public List<Question> getQuizListByTag(String tag) {        
+        return Datastore.query(t).filterInMemory(t.tags.contains(tag)).asList();
     }
     public Iterator<Question> getQuizByTags(String[] tags) {        
         
@@ -619,6 +621,42 @@ public class QuizProcessorService {
         Datastore.put(prevSiblingModule);                
         tx.commit();
         return module;
+	}
+	public ServiceResponse loadModule(String mid) {
+		ModuleMeta mm = ModuleMeta.get();
+		Key key = KeyFactory.createKey(mm.getKind(), Long.parseLong(mid));
+		Module module = Datastore.query(mm).filter(mm.key.equal(key)).asSingle();
+		if(module == null){
+			return Utils.sendError("Module not found");
+		}		
+		List<Question> qs = this.getQuizListByTag(mid);
+		KeyValueMap map = new KeyValueMap();
+		map.put("description", module.getDescription());
+		map.put("questions", qs);
+        map.put("code", "LOADED");            
+        ServiceResponse response = new ServiceResponse();
+        response.setStatus(true);
+        response.setMetaData(map.toJson());
+        log.info(map.toJson());
+		return response;
+
+	}
+	public Module getModule(String mid) {
+		ModuleMeta mm = ModuleMeta.get();
+		Key key = KeyFactory.createKey(mm.getKind(), Long.parseLong(mid));
+		Module module = Datastore.query(mm).filter(mm.key.equal(key)).asSingle();
+		return module;
+	}
+	public ServiceResponse updateModule(Module module) {
+		Transaction tx = Datastore.beginTransaction();
+		Datastore.put(module);
+		tx.commit();
+		KeyValueMap map = new KeyValueMap();				
+        map.put("code", "SAVED");            
+        ServiceResponse response = new ServiceResponse();
+        response.setStatus(true);
+        response.setMetaData(map.toJson());        
+		return response;
 	}
     
 }

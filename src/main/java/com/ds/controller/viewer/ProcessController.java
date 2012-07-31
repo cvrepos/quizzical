@@ -313,7 +313,7 @@ public class ProcessController extends Controller {
             }
             
         } else {
-        	Iterator<Question> it = service.getQuizByTag(mid);
+        	Iterator<Question> it = service.getQuizItByTag(mid);
         	if(!it.hasNext()){
         		return Utils.sendError("Module does not have any content!");
         	}

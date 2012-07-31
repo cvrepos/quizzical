@@ -217,3 +217,11 @@ table.dataTable th:active {
 	*margin-top: -1px;
 }
 
+.row_selected tr{
+	background-color: #B0BED9;
+}
+
+.row_selected td{
+	background-color: #9FAFD1;
+}
+

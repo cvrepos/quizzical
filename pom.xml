@@ -23,6 +23,13 @@
         <updatePolicy>never</updatePolicy>
       </releases>
     </repository>
+    <!-- 
+    <repository>
+    <id>maven.openid4java</id>
+    <url>https://oss.sonatype.org/content/repositories/openid4java-snapshots</url>
+    <snapshots />
+    </repository>
+     -->
   </repositories>
   <pluginRepositories>
     <pluginRepository>
@@ -38,6 +45,14 @@
     </pluginRepository>
   </pluginRepositories>
   <dependencies>
+  <!-- 
+    <dependency>
+        <groupId>org.openid4java</groupId>
+        <artifactId>openid4java-consumer</artifactId>
+        <version>0.9.6</version>
+        <type>pom</type>        
+    </dependency>
+   -->
     <dependency>
       <groupId>org.slim3</groupId>
       <artifactId>slim3</artifactId>
@@ -106,7 +121,7 @@
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>
-  </dependencies>
+    </dependencies>
   <build>
     <finalName>slim3-maven</finalName>
     <outputDirectory>${generated.war}/WEB-INF/classes</outputDirectory>

@@ -1,0 +1,307 @@
+body {
+  position: relative;
+  font: 81.25% arial, helvetica, sans-serif;
+  margin: auto;  
+  text-rendering: optimizeLegibility;
+}
+input{
+	border-style:double;
+}
+.textinput{
+	width: 300px;
+}
+.legendlabel{
+	margin:3px;
+	font-weight:bolder;
+	border-bottom: 3px solid #CACACA;
+	float:left;
+}
+#header{		
+	height:80px;				 
+	background: #080707;
+	background: -moz-linear-gradient(#080707,#0D0C0C);
+	background: -webkit-linear-gradient(#080707,#0D0C0C);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#080707',endColorstr='#0D0C0C')";
+	position: relative;
+	z-index: 10;
+	border-bottom: 5px solid #C8D11D;
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);	
+}
+#logo{
+	margin-left:13%;
+	margin-top:10px;
+	margin-bottom:10px;	
+	font-size: 28pt;
+	font-weight:bolder;					
+	float:left;
+}
+#logo a{
+	text-decoration: none;	
+	color:white;
+}
+#menu{	
+	float:right;
+	margin-right:15%;
+	margin-top:10px;
+	margin-bottom:10px;	
+}
+#menu ul{			
+	list-style-type: none;	
+}
+#menu ul li{
+	margin: 0;
+	padding: 10px;
+	font-size: 20px;
+	font-weight:bolder;	
+	display:inline;	
+}
+#menu ul li a{
+	text-decoration: none;	
+	color:white;
+}
+#menu ul li a:hover{
+	color: E6E6AA;		
+}
+
+#content{
+	margin-left:  15%;
+	margin-right: 15%;
+	width:70%;	
+	position:relative;	
+	overflow-y:auto;		
+}
+
+#notification_banner_text{		
+	height:50px;		 
+	border-left: 1px solid #CACACA;
+	border-right: 1px solid #CACACA;
+	background: #7A2020;
+	background: -moz-linear-gradient(#7A2020,#A86363);
+	background: -webkit-linear-gradient(#7A2020,#A86363);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#7A2020',endColorstr='#A86363')";
+	position: relative;
+	z-index: 10;
+	border-bottom: 1px solid #CACACA;
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);		
+	color:white;	
+	border-radius: 5px;
+	text-align:center;			
+	margin-top:20px;
+	
+}
+#notification_banner_text div{
+	font-size: 20pt;
+	padding:10px;
+}
+#notification_dynamic_text{		
+	height:50px;
+	margin-top:20px;		 
+	border-left: 1px solid #CACACA;
+	border-right: 1px solid #CACACA;
+	background: #E7E6EB;	
+	position: relative;
+	z-index: 10;
+	border-bottom: 1px solid #CACACA;
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);		
+	color:black;	
+	text-align:left;	
+	border-radius: 5px;	
+	margin-top:1px;
+}
+#notification_dynamic_text div{
+	font-size: 18pt;
+	padding:10px;
+}
+
+#home_info{		 
+	border-left: 1px solid #CACACA;
+	border-right: 1px solid #CACACA;	
+	position: relative;
+	z-index: 10;
+	border-bottom: 1px solid #CACACA;
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+	border-radius: 5px;
+	margin-top: 20px;
+	max-height:100%;
+	overflow-y:auto;		 
+}
+
+
+.home_info_list{	
+	list-style-type: none;
+	margin: 0;
+	padding: 10px;	
+}
+.home_info_list li{
+	float: left;
+	margin: 0;		
+	padding: 10px;	
+	display:inline;	
+}
+.home_info_list li div{	
+	width:200px;
+	display:block-inline;
+}
+.home_info_list li label{	
+	font-weight:bolder;	
+	font-size: 20px;
+	border-bottom: 4px solid #999999;
+}
+.home_info_list li div p{		
+	text-align:justify;
+	font-size: 18px;	
+	font-weight:100;
+}
+#footer{				 
+	border-top: 5px solid #DE1414;
+	background: #FAFAFA;
+	background: -moz-linear-gradient(#FAFAFA,#EAEAEA);
+	background: -webkit-linear-gradient(#FAFAFA,#EAEAEA);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa',endColorstr='#eaeaea')";
+	position: relative;
+	z-index: 10;	
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+	margin-top:20px;
+	max-height:100%;
+	overflow-y:auto;	
+}
+#footer_info{
+	margin-left: 10%;
+	margin-right: 10%;
+	text-align:center;
+}
+#footer_info ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 10px;		
+}
+#footer_info ul li{	
+	margin: 0;		
+	padding-left: 20px;
+	border: 5px;	
+	display:inline;		
+}
+#footer_info ul li a{	
+	text-decoration:none;		
+}
+#footer_info ul li a:hover{	
+	color: #4183C4;		
+}
+#copyright{	
+	padding-top:10px;
+	margin-left: 30%;
+	margin-right: 30%;
+	text-align:center;
+}
+
+/* for login page */
+#user_access{		
+	height:500px;		 
+	border-left: 1px solid #CACACA;
+	border-right: 1px solid #CACACA;	
+	position: relative;
+	z-index: 10;
+	border-bottom: 1px solid #CACACA;
+	box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);			
+	border-radius: 5px;
+	text-align:center;			
+	margin-top:20px;	
+	
+}
+#login{			
+	float:left;	
+	padding:10px;
+	margin: 10px;
+	width: 40%;	
+	
+}
+.formentry{			
+	float:left;		
+	text-align:left;
+	margin-right:200px;
+	padding:3px;
+}
+.formentry input, label {
+    display:block;    
+}
+
+.buttons{			
+	float:left;	
+	display:inline;			
+	padding:0;
+	margin-top:10px;
+	width:100%;
+}
+.buttons input{			
+	float:left;	
+	padding:3px;
+	-moz-border-radius:3px;
+		-webkit-border-radius:3px;
+		-o-border-radius:3px;
+		border-radius:3px;	
+}
+#create_user{		
+	display:inline;
+	float:left;	
+	padding:10px;
+	margin: 10px;
+	width: 40%;
+	position:relative;			
+}
+
+.test_box{
+	width:100px;
+	height:100px;
+	border:solid;
+	margin:10px;
+}
+
+/**** Isotope Filtering ****/
+
+.isotope-item {
+  z-index: 2;
+}
+
+.isotope-hidden.isotope-item {
+  pointer-events: none;
+  z-index: 1;
+}
+
+/**** Isotope CSS3 transitions ****/
+
+.isotope,
+.isotope .isotope-item {
+  -webkit-transition-duration: 0.8s;
+     -moz-transition-duration: 0.8s;
+      -ms-transition-duration: 0.8s;
+       -o-transition-duration: 0.8s;
+          transition-duration: 0.8s;
+}
+
+.isotope {
+  -webkit-transition-property: height, width;
+     -moz-transition-property: height, width;
+      -ms-transition-property: height, width;
+       -o-transition-property: height, width;
+          transition-property: height, width;
+}
+
+.isotope .isotope-item {
+  -webkit-transition-property: -webkit-transform, opacity;
+     -moz-transition-property:    -moz-transform, opacity;
+      -ms-transition-property:     -ms-transform, opacity;
+       -o-transition-property:         top, left, opacity;
+          transition-property:         transform, opacity;
+}
+
+/**** disabling Isotope CSS3 transitions ****/
+
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+  -webkit-transition-duration: 0s;
+     -moz-transition-duration: 0s;
+      -ms-transition-duration: 0s;
+       -o-transition-duration: 0s;
+          transition-duration: 0s;
+}

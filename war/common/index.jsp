@@ -9,6 +9,21 @@
 <title>common Index</title>
 </head>
 <body>
-<p>Hello common Index !!!</p>
+<div id='user_access'>
+			<div id='login'>
+			<form id='form_sign_in' method='post' action='/common'>
+			  <label class='legendlabel'>Sign In</label>
+			  
+			  <div class='formentry'>										
+						<label for='email'>Email</label>
+						<input type='text' class='textinput' name='email'></input>
+				</div>					
+				<div class='buttons'>		
+					<input type='hidden' name='op' value='login'></input>
+					<input type='submit' id='button_login' name='login' value='Login'></input>					
+				</div>
+				
+			</form>	
+	 		</div>	
 </body>
 </html>
