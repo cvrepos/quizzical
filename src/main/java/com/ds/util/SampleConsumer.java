@@ -1,5 +1,5 @@
 package com.ds.util;
-/*
+
 import org.openid4java.discovery.Identifier;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.message.ax.FetchRequest;
@@ -16,13 +16,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.io.IOException;
-*/
+
 /**
  * Sample Consumer (Relying Party) implementation.
  */
 public class SampleConsumer
 {
-	/*
+	
     public ConsumerManager manager;
 
     public SampleConsumer() throws ConsumerException
@@ -86,7 +86,7 @@ public class SampleConsumer
                 // Option 2: HTML FORM Redirection (Allows payloads >2048 bytes)
 
                 RequestDispatcher dispatcher =
-                        httpReq.getRequestDispatcher("formredirection.jsp");
+                        httpReq.getRequestDispatcher("/common/formredirection.jsp");
                 httpReq.setAttribute("parameterMap", authReq.getParameterMap());
                 httpReq.setAttribute("destinationUrl", authReq.getDestinationUrl(false));
                 dispatcher.forward(httpReq, httpResp);
@@ -156,5 +156,5 @@ public class SampleConsumer
 
         return null;
     }
-    */
+    
 }

@@ -11,7 +11,14 @@ public class IndexController extends Controller {
 	
 	
     @Override
-    public Navigation run() throws Exception {    			
+    public Navigation run() throws Exception {
+    	String login = (String) request.getAttribute("action");
+    	SampleConsumer consumer = new SampleConsumer();
+		if (!Utils.isValid(login) || !login.equals("login")) {			
+			consumer.authRequest("https://www.google.com/accounts/o8/id", 
+					this.request, this.response);			
+		}
+		
         return forward("index.jsp");
     }
 }

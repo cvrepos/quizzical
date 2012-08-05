@@ -75,6 +75,7 @@
     
     <security-constraint>
         <web-resource-collection>
+         <web-resource-name>jsps</web-resource-name>
             <url-pattern>*.jsp</url-pattern>
         </web-resource-collection>
         <auth-constraint>
@@ -82,10 +83,12 @@
     </security-constraint>
     <security-constraint>
         <web-resource-collection>
+         <web-resource-name>others</web-resource-name>
             <url-pattern>/slim3/gtx</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
+    
 </web-app>

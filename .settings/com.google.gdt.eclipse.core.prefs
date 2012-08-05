@@ -1,6 +1,4 @@
-#Tue Jul 31 00:57:20 EDT 2012
 eclipse.preferences.version=1
 jarsExcludedFromWebInfLib=
-lastWarOutDir=/Users/adeka/Documents/eclipse_workspace/quiz_maven/quizzical/target/quizzical-1.0-SNAPSHOT
-warSrcDir=src/main/webapp
+warSrcDir=war
 warSrcDirIsOutput=false
