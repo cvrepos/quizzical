@@ -12,8 +12,7 @@ import com.ds.model.Module;
 import com.ds.model.Session;
 import com.ds.model.Tag;
 import com.ds.model.json.KeyValueMap;
-import com.ds.service.QuizProcessorService;
-import com.ds.util.Utils;
+import com.ds.service.Utils;
 import com.google.appengine.api.datastore.Transaction;
 
 public class IndexController extends Controller {

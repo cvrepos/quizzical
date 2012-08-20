@@ -26,14 +26,13 @@ import com.ds.model.QuestionState;
 import com.ds.model.Session;
 import com.ds.model.json.KeyValueMap;
 import com.ds.model.json.MatchSearch;
-import com.ds.service.QuizProcessorService;
+import com.ds.service.Utils;
 import com.ds.service.ServiceResponse;
-import com.ds.util.StaticValues;
-import com.ds.util.Utils;
+import com.ds.util.ConstStrings;
 
 public class ProcessController extends Controller {
 
-    private QuizProcessorService service = QuizProcessorService.getInstance();
+    
     private static final Logger log = Logger.getLogger(ProcessController.class.getName());
 
     @Override
@@ -53,7 +52,7 @@ public class ProcessController extends Controller {
 
 				// set the cookie in the response
 				Cookie sCookie = new Cookie("session",
-						service.generateSessionCookie("admin"));
+						Utils.generateSessionCookie("admin"));
 				// BUG: chrome cannot set a cookie on redirect
 				sCookie.setPath("/");
 				response.addCookie(sCookie);
@@ -67,7 +66,7 @@ public class ProcessController extends Controller {
         
         
         String action =
-            (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "action");
+            (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "action");
         if (!Utils.isValid(action)) {
             log.info("Action is invalid");
             return null;
@@ -92,12 +91,12 @@ public class ProcessController extends Controller {
         log.info("In onGet");
 
         Session session = Utils.getSession(request.getCookies());
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
@@ -114,7 +113,7 @@ public class ProcessController extends Controller {
 
         log.info("Found a module");
         Utils.dumpModule(module);
-        String qid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE +"qid");
+        String qid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE +"qid");
         if (!Utils.isValid(qid)) {
             log.info("Qid is invalid");
             return Utils.sendError("Invalid qid");
@@ -136,7 +135,7 @@ public class ProcessController extends Controller {
         
         QuestionState state = module.getQStates().get(index);
        
-        Objective q = (Objective) service.getQuizByKey(state.getQid());
+        Objective q = (Objective) Utils.getQuizByKey(state.getQid());
         if (q == null) {
             return Utils.sendError("Invalid index");
         }        
@@ -160,12 +159,12 @@ public class ProcessController extends Controller {
     private ServiceResponse onSubmit() {
         log.info("In onSubmit");
         Session session = Utils.getSession(request.getCookies());
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.warning("Invalid module name");
             return Utils.sendError("Invalid module name");
@@ -182,7 +181,7 @@ public class ProcessController extends Controller {
 
         log.info("Found a module");
         Utils.dumpModule(module);
-        String qid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE +"qid");
+        String qid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE +"qid");
         if (!Utils.isValid(qid)) {
             log.info("Qid is invalid");
             return Utils.sendError("Invalid qid");
@@ -192,7 +191,7 @@ public class ProcessController extends Controller {
         QuestionState state = module.getQStates().get(index);
         long id = state.getQid();
         // the user has clicked next - check for answers
-        String ans = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE +"ans");
+        String ans = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE +"ans");
         if (Utils.isValid(ans)) {
             // valid answers
             String[] vals = ans.split(",");
@@ -204,7 +203,7 @@ public class ProcessController extends Controller {
             MatchSearch search = new MatchSearch();
             search.setAnswers(vals);
             search.setId(id);
-            boolean result = service.matchAnswers(search, session, null);
+            boolean result = Utils.matchAnswers(search, session, null);
             if (result) {
                 log.info("Its a correct answer.");
                 state.setState(QuestionState.QStatEnum.CORRECT);
@@ -255,12 +254,12 @@ public class ProcessController extends Controller {
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.warning("Invalid module name");
             return Utils.sendError("Invalid module name");
         }
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
@@ -276,9 +275,9 @@ public class ProcessController extends Controller {
             // check if force start enabled - in such case reset the question
             // state
             String force =
-                (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "force");
+                (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "force");
             if (Utils.isValid(force)) {
-                if (force.equals(StaticValues.YES)) {
+                if (force.equals(ConstStrings.YES)) {
                     Utils.resetQState(
                         ansStates,
                         QuestionState.QStatEnum.INITIALIZED);
@@ -313,7 +312,7 @@ public class ProcessController extends Controller {
             }
             
         } else {
-        	Iterator<Question> it = service.getQuizItByTag(mid);
+        	Iterator<Question> it = Utils.getQuizItByTag(mid);
         	if(!it.hasNext()){
         		return Utils.sendError("Module does not have any content!");
         	}
@@ -365,12 +364,12 @@ public class ProcessController extends Controller {
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.info("Invalid module name");
             return Utils.sendError("Invalid module name");
@@ -414,12 +413,12 @@ public class ProcessController extends Controller {
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.info("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.info("Invalid module name");
             return Utils.sendError("Invalid module name");
@@ -467,12 +466,12 @@ public class ProcessController extends Controller {
         if (session == null) {
             return Utils.sendError("Invalid session.");
         }
-        String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
+        String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
         if (!Utils.isValid(mid)) {
             log.warning("Invalid module id");
             return Utils.sendError("Invalid module id");
         }
-        String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
+        String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
         if (!Utils.isValid(mname)) {
             log.warning("Invalid module name");
             return Utils.sendError("Invalid module name");
@@ -490,7 +489,7 @@ public class ProcessController extends Controller {
             List<QuestionState> qStates = module.getQStates();
             Map<String, Integer> tagCounts = new HashMap<String, Integer>();
             for(QuestionState s: qStates){
-                Question q = service.getQuizByKey(s.getQid());
+                Question q = Utils.getQuizByKey(s.getQid());
                 for(String tag: q.getTags()){
                 	if(tag.equals(mid)){
                 		continue;

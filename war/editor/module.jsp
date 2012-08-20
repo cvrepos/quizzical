@@ -8,9 +8,9 @@
 <head>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>viewer Index</title>			
-		<link type="text/css" href="../css/cube.css" rel="stylesheet" />	
-		<script type="text/javascript" src="../js/jquery-1.6.2.min.js"></script>
+<title>viewer Index</title>					
+		<link type="text/css" href="../css/custom.css" rel="stylesheet" />
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
 		<script type="text/javascript" src="../js/json2.js"></script>
 		<script type="text/javascript">
 		<% if (request.getAttribute("QN_mname") != null && request.getAttribute("QN_modid") != null ){ 
@@ -106,14 +106,15 @@
 		</script>				
 </head>
 <body>
-<h1>Career Vision</h1>
-<header>
-	<a href="">Demo</a>	 
-	<a href="../login?op=<%=request.getAttribute("loginop")%>">Log<%=request.getAttribute("loginop") %></a>
-</header>
-<div id='message_board'>
-</div>
-<div id='question_container' >
+	<div id="wrapper">
+		<jsp:include page="../common/header.jsp" />
+		<div id="content">
+		    <div id='notification_banner_text'>
+				<div>Welcome take.a.test editor!</div>
+			</div>
+
+
+			<div id='question_container' >
 	
             <fieldset> 
               <span class='formentry'> 
@@ -140,7 +141,7 @@
               </span> 
             
               <span class='formentry'> 
-               <label for='answer4' style='display:block' >Option 4:</font></label>             
+               <label for='answer4' style='display:block' >Option 4:</label>             
                <textarea name='answer4'  id='answer4' style='display:block' title='Jupitar'></textarea>
                 Is the above option correct?<input type='checkbox' id='isCorrect4'  name='isCorrect4' ></input> 
               </span> 
@@ -158,11 +159,10 @@
               </span> 
                <input type='button' id='submit-button' value='submit'></input> 
                <input type='button' class='preview-button' name='preview' value='preview'></input>
-            </fieldset>    
+            </fieldset> 
+       </div>
+       	</div>  
+       <jsp:include page="../common/footer.jsp" />
 </div>
-<footer>
-	<a href="">Home</a>	
-	<a href="">About Us</a>
-</footer>
 </body>
 </html>

@@ -8,9 +8,9 @@
 <head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<title>Welcome to Quiz Editor</title>
-		<link type="text/css" href="../css/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
-		<script type="text/javascript" src="../js/jquery-1.6.2.min.js"></script>
-		<script type="text/javascript" src="../js/jquery-ui-1.8.16.custom.min.js"></script>
+		<link type="text/css" href="../css/jquery-ui.custom.css" rel="stylesheet" />	
+		<script type="text/javascript" src="../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
 		
 		<script type="text/javascript" src="../js/jquery.validate.js"></script>
 		<script type="text/javascript" src="../js/jquery.example.js"></script>

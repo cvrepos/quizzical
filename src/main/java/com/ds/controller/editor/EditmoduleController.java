@@ -1,12 +1,12 @@
-package com.ds.controller.adduser;
+package com.ds.controller.editor;
 
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 
-public class IndexController extends Controller {
+public class EditmoduleController extends Controller {
 
     @Override
     public Navigation run() throws Exception {    	
-        return forward("index.jsp");
+        return forward("editmodule.jsp");
     }
 }

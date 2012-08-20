@@ -2,6 +2,8 @@
 package com.ds.service;
 
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +16,9 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 import org.slim3.datastore.Datastore;
@@ -30,9 +35,11 @@ import com.ds.meta.QuestionMeta;
 import com.ds.meta.SessionMeta;
 import com.ds.meta.TagMeta;
 import com.ds.meta.UserMeta;
+import com.ds.model.ModCopy;
 import com.ds.model.Module;
 import com.ds.model.Objective;
 import com.ds.model.Option;
+import com.ds.model.QuestionState;
 import com.ds.model.Quiz;
 import com.ds.model.Presentation;
 import com.ds.model.Question;
@@ -40,10 +47,11 @@ import com.ds.model.Session;
 import com.ds.model.Subjective;
 import com.ds.model.Tag;
 import com.ds.model.User;
+import com.ds.model.QuestionState.QStatEnum;
 import com.ds.model.json.BasicSearch;
 import com.ds.model.json.KeyValueMap;
 import com.ds.model.json.MatchSearch;
-import com.ds.util.Utils;
+
 
 
 import com.google.appengine.api.datastore.Key;
@@ -52,32 +60,24 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.gson.Gson;
 
 
-public class QuizProcessorService {
+public class Utils {
 
 
-	private static final Logger log = Logger.getLogger(QuizProcessorService.class.getName());
-	private static final String ADMIN = "admin";
-    private static QuizProcessorService object = null;
-    public static QuizProcessorService getInstance(){
-        if(object == null){
-            object = new QuizProcessorService();
-            //init the class
-            object.init();
-        }
-        return object;
-    }
-    private QuizProcessorService(){}
+	private static final Logger log = Logger.getLogger(Utils.class.getName());
+	private static final String ADMIN = "admin";    
     
-    private Map<String, Question > quizTypeMap = new HashMap<String, Question>();
+    private Utils(){}
     
-    public void init()
+    private static Map<String, Question > quizTypeMap = new HashMap<String, Question>();
+    
+    public static void init()
     {
     	
         quizTypeMap.put("objective", new Objective());
         //quizTypeMap.put("subjective", new Subjective());
     }
     
-    public void process(Map<String, Object> input) {
+    public static void process(Map<String, Object> input) {
         //check type of the quiz
         String type = null;
         if(input.containsKey("type")){
@@ -123,10 +123,10 @@ public class QuizProcessorService {
             System.err.println("Quiz is null");
         }
     }
-    public List<Presentation> getQuizTypes(){
+    public static List<Presentation> getQuizTypes(){
         List<Presentation> types = new LinkedList<Presentation>();
         Question q = null;
-        Iterator<Question> it = this.quizTypeMap.values().iterator();
+        Iterator<Question> it = quizTypeMap.values().iterator();
         while(it.hasNext())
         {
             q = it.next();        
@@ -134,26 +134,31 @@ public class QuizProcessorService {
         }
         return types;
     }
-    private QuestionMeta t = new QuestionMeta();
-    public List<Question> getAllQuiz() {
+    
+    public static List<Question> getAllQuiz() {
+    	QuestionMeta t = new QuestionMeta();
         return Datastore.query(t).sort(t.createdDate.desc).asList();
     }
-    public List<Question> getQuizByKey(String id) {
+    public static List<Question> getQuizByKey(String id) {
+    	QuestionMeta t = new QuestionMeta();
         Key k = KeyFactory.stringToKey(id);    
         return Datastore.query(t).filter(t.key.equal(k)).asList();
     }
-    public Question getQuizByKey(Long id) {
+    public static Question getQuizByKey(Long id) {
+    	QuestionMeta t = new QuestionMeta();
         Key k = KeyFactory.createKey(QuestionMeta.get().getKind(), id);
         return Datastore.query(t).filter(t.key.equal(k)).asSingle();
     }
-    public Iterator<Question> getQuizItByTag(String tag) {        
+    public static Iterator<Question> getQuizItByTag(String tag) {   
+    	QuestionMeta t = new QuestionMeta();
         return Datastore.query(t).filterInMemory(t.tags.contains(tag)).asList().iterator();
     }
-    public List<Question> getQuizListByTag(String tag) {        
+    public static List<Question> getQuizListByTag(String tag) { 
+    	QuestionMeta t = new QuestionMeta();
         return Datastore.query(t).filterInMemory(t.tags.contains(tag)).asList();
     }
-    public Iterator<Question> getQuizByTags(String[] tags) {        
-        
+    public static Iterator<Question> getQuizByTags(String[] tags) {        
+    	QuestionMeta t = new QuestionMeta();
         Set<Question> qs = new HashSet<Question>();
         for(String tag:tags){
             qs.addAll(Datastore.query(t).filterInMemory(t.tags.contains(tag)).asList());
@@ -161,9 +166,9 @@ public class QuizProcessorService {
         return qs.iterator();
     }
 
-    public Iterator<Question> getQuizByTagCursored(String tag,
+    public static Iterator<Question> getQuizByTagCursored(String tag,
             Map<String, String> cursorMap, int step) {
-
+    	QuestionMeta t = new QuestionMeta();
         if (cursorMap.isEmpty()) {
             S3QueryResultList<Question> results =
                 Datastore.query(Question.class).limit(step).asQueryResultList();
@@ -188,12 +193,13 @@ public class QuizProcessorService {
             return results.iterator();
         }
     }
-    public Iterator<Tag> getTags(int size) {        
+    public static Iterator<Tag> getTags(int size) { 
+    	
         TagMeta m = TagMeta.get();
         return Datastore.query(m).sort(m.count.desc).limit(size).asIterator();
         
     }
-    public Iterator<Question> getQuizes(String question, List<String> tags,
+    public static Iterator<Question> getQuizes(String question, List<String> tags,
             Date start, Date end, String user) 
     {
         QuestionMeta m = QuestionMeta.get();
@@ -221,7 +227,7 @@ public class QuizProcessorService {
         return Datastore.query(m).filter(array).filterInMemory(iarray).asList().iterator();
 
     }
-    public boolean isValidUser(String username, String password) {
+    public static boolean isValidUser(String username, String password) {
         
         UserMeta u = UserMeta.get();
         User user = Datastore.query(u).filter(u.username.equal(username.trim()), u.password.equal(password.trim())).asSingle();
@@ -232,7 +238,7 @@ public class QuizProcessorService {
         }
     }
     
-    private boolean isExistinUser(String username){
+    private static boolean isExistinUser(String username){
         UserMeta u = UserMeta.get();
         User user = Datastore.query(u).filter(u.username.equal(username)).asSingle();
         if(user == null){
@@ -242,7 +248,7 @@ public class QuizProcessorService {
         }
     }
     
-    public void addUser(User user) throws UserManagementException{
+    public static void addUser(User user) throws UserManagementException{
         if(isExistinUser(user.getUsername())){
             throw new UserManagementException("already exists");
         }
@@ -250,7 +256,7 @@ public class QuizProcessorService {
         Datastore.put(user);
         tx.commit();
     }
-    public String generateSessionCookie(String username) {
+    public static String generateSessionCookie(String username) {
         // TODO Auto-generated method stub
         Transaction tx = Datastore.beginTransaction();
         Session session = new Session();
@@ -259,7 +265,7 @@ public class QuizProcessorService {
         tx.commit();
         return KeyFactory.keyToString(key);
     }
-    public boolean isValidSession(String sessionInfo) {
+    public static boolean isValidSession(String sessionInfo) {
         Key key = KeyFactory.stringToKey(sessionInfo);
         if(Datastore.get(key) != null){
             return true;
@@ -267,12 +273,12 @@ public class QuizProcessorService {
             return false;
         }
     }
-    public Session getSession(String sessionInfo) {
+    public static Session getSession(String sessionInfo) {
         Key key = KeyFactory.stringToKey(sessionInfo);
         SessionMeta s = SessionMeta.get();        
         return Datastore.query(s).filter(s.key.equal(key)).asSingle();
     }
-    public void addTag(String parent, String childs, boolean increment) {
+    public static void addTag(String parent, String childs, boolean increment) {
         
         Tag tag  = getTag(parent);
         if(tag != null ){
@@ -300,17 +306,17 @@ public class QuizProcessorService {
         Datastore.put(tag);        
         tx.commit();        
     }
-    private Tag getTag(String name){
+    private static Tag getTag(String name){
         TagMeta t = TagMeta.get();
         return Datastore.query(t).filter(t.name.equal(name.trim().toLowerCase())).asSingle();
     }
-    public ServiceResponse addQuestion(String type, Long id, String question, Session session, String mid) throws ServletException {
+    public static ServiceResponse addQuestion(String type, Long id, String question, Session session, String mid) throws ServletException {
         //check type of the quiz
-        if(!this.quizTypeMap.containsKey(type)){
+        if(!quizTypeMap.containsKey(type)){
             throw new ServletException("type is invalid");
         }
         ServiceResponse response = new ServiceResponse();
-        Question qt = this.quizTypeMap.get(type);
+        Question qt = quizTypeMap.get(type);
         Gson gson = new Gson();
         System.err.println(question);
         Question quiz = (Question) gson.fromJson(question, qt.getClass());
@@ -370,7 +376,7 @@ public class QuizProcessorService {
         
         
     }
-    public ServiceResponse deleteQuestion(String id, Session session) {
+    public static ServiceResponse deleteQuestion(String id, Session session) {
         QuestionMeta m = QuestionMeta.get();
         ServiceResponse result = new ServiceResponse();
         Key key = KeyFactory.createKey(m.getKind(), Long.parseLong(id));
@@ -389,7 +395,7 @@ public class QuizProcessorService {
         // TODO Auto-generated method stub
         return result;
     }
-    public ServiceResponse updateQuestion(String id, String question,
+    public static ServiceResponse updateQuestion(String id, String question,
             Session session) throws ServletException {
         QuestionMeta m = QuestionMeta.get();
         ServiceResponse result = new ServiceResponse();
@@ -401,14 +407,14 @@ public class QuizProcessorService {
             result.setMetaData("invalid key");
         }else{
             if(q instanceof Objective){
-                return this.addQuestion("objective", lid, question, session, null);
+                return addQuestion("objective", lid, question, session, null);
             }            
             result.setStatus(false);
             result.setMetaData("cannot update");
         }
         return result;
     }
-    public ServiceResponse basicSearch(String val, Session session) {
+    public static ServiceResponse basicSearch(String val, Session session) {
         Gson gson = new Gson();
         BasicSearch search = gson.fromJson(val, BasicSearch.class);
         Iterator<Question> quizes = getQuizes(search, session);
@@ -431,7 +437,7 @@ public class QuizProcessorService {
         response.setMetaData(qstring);
         return response;
     }
-    public ServiceResponse matchSearch(String val, Session session) {
+    public static ServiceResponse matchSearch(String val, Session session) {
         Gson gson = new Gson();
         MatchSearch search = gson.fromJson(val, MatchSearch.class);
         ServiceResponse response = new ServiceResponse();
@@ -443,7 +449,7 @@ public class QuizProcessorService {
         return response;
     }    
 
-    public boolean matchAnswers(MatchSearch search, Session session,
+    public static boolean matchAnswers(MatchSearch search, Session session,
             List<Option> options) 
     {
         ObjectiveMeta m = ObjectiveMeta.get();        
@@ -473,7 +479,7 @@ public class QuizProcessorService {
         }
         return failed;
     }
-    public Iterator<Question> getQuizes(BasicSearch search, Session session) {
+    public static Iterator<Question> getQuizes(BasicSearch search, Session session) {
         QuestionMeta m = QuestionMeta.get();
         List<FilterCriterion> flist = new LinkedList<FilterCriterion>();
         List<InMemoryFilterCriterion> iflist =
@@ -522,11 +528,11 @@ public class QuizProcessorService {
        return list.iterator();
 
     }
-    public ServiceResponse search(String type, String query, Session session) {
+    public static ServiceResponse search(String type, String query, Session session) {
         if(type.equals("basic")){
-            return this.basicSearch(query, session);
+            return basicSearch(query, session);
         } else if(type.equals("match")){
-            return this.matchSearch(query, session);
+            return matchSearch(query, session);
         } else{
             ServiceResponse response = new ServiceResponse();
             response.setStatus(false);
@@ -535,14 +541,14 @@ public class QuizProcessorService {
         }
         
     }
-    public void removeSession(Session session) {       
+    public static void removeSession(Session session) {       
         Transaction tx = Datastore.beginTransaction();                               
         Datastore.delete(session.getKey());        
         tx.commit();        
         
     }
 
-    public Module createModule(String mname, String description, String user) {
+    public static Module createModule(String mname, String description, String user) {
 		log.info("Creating a module with name:" +mname);
 		Module module = new Module();
 		module.setName(mname);
@@ -556,7 +562,7 @@ public class QuizProcessorService {
         tx.commit();
         return module;
 	}
-	public Module createModuleAsChild(String mname, String description, Long parent, String user) {
+	public static Module createModuleAsChild(String mname, String description, Long parent, String user) {
 		log.info("Creating a module with name:" +mname);
 		ModuleMeta m = ModuleMeta.get();
 		Module parentModule = null;		
@@ -586,7 +592,7 @@ public class QuizProcessorService {
         tx.commit();                 
         return module;
 	}
-	public Module createModuleAsSibling(String mname, String description, Long prevSibling, String user) {
+	public static Module createModuleAsSibling(String mname, String description, Long prevSibling, String user) {
 		log.info("Creating a module with name:" +mname);
 		ModuleMeta m = ModuleMeta.get();		
 		Module prevSiblingModule = null;
@@ -622,14 +628,14 @@ public class QuizProcessorService {
         tx.commit();
         return module;
 	}
-	public ServiceResponse loadModule(String mid) {
+	public static ServiceResponse loadModule(String mid) {
 		ModuleMeta mm = ModuleMeta.get();
 		Key key = KeyFactory.createKey(mm.getKind(), Long.parseLong(mid));
 		Module module = Datastore.query(mm).filter(mm.key.equal(key)).asSingle();
 		if(module == null){
 			return Utils.sendError("Module not found");
 		}		
-		List<Question> qs = this.getQuizListByTag(mid);
+		List<Question> qs = getQuizListByTag(mid);
 		KeyValueMap map = new KeyValueMap();
 		map.put("description", module.getDescription());
 		map.put("questions", qs);
@@ -641,13 +647,13 @@ public class QuizProcessorService {
 		return response;
 
 	}
-	public Module getModule(String mid) {
+	public static Module getModule(String mid) {
 		ModuleMeta mm = ModuleMeta.get();
 		Key key = KeyFactory.createKey(mm.getKind(), Long.parseLong(mid));
 		Module module = Datastore.query(mm).filter(mm.key.equal(key)).asSingle();
 		return module;
 	}
-	public ServiceResponse updateModule(Module module) {
+	public static ServiceResponse updateModule(Module module) {
 		Transaction tx = Datastore.beginTransaction();
 		Datastore.put(module);
 		tx.commit();
@@ -658,5 +664,96 @@ public class QuizProcessorService {
         response.setMetaData(map.toJson());        
 		return response;
 	}
+	public static boolean isValid(String val){
+        if(val == null || val.isEmpty() || val.equalsIgnoreCase("undefined")){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public static Session getSession(Cookie[] cookies){
+        String sessionInfo = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                log.info("Cookie:" +cookie.getName());
+                if (cookie.getName().equals("session")) {
+                    sessionInfo = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if(sessionInfo == null){
+            log.info("Cannot retrieve session cookie.");
+            return null;
+        }
+        return getSession(sessionInfo);
+    }
+    public static void respond(ServiceResponse result, HttpServletResponse response) throws IOException{        
+        Gson gson = new Gson();
+        String json = gson.toJson(result);  
+        log.info(json);
+        PrintWriter w = response.getWriter();
+        response.setContentType("text/json");            
+        w.print(json);
+        w.close();
+    }
+    
+    public static ServiceResponse sendError(String error){
+        ServiceResponse response = new ServiceResponse();
+        response.setStatus(false);
+        response.setMetaData(new KeyValueMap("message", error).toJson());
+        return response;
+    }
+    public static ServiceResponse sendSuccess(String error){
+        ServiceResponse response = new ServiceResponse();
+        response.setStatus(false);
+        response.setMetaData(new KeyValueMap("message", error).toJson());
+        return response;
+    }
+    public static boolean alreadyStarted(List<QuestionState> qStates) {
+        for(QuestionState s:qStates){
+            if(s.getState() != QuestionState.QStatEnum.INITIALIZED
+                    || s.getState() != QuestionState.QStatEnum.UNINITIALIZED){
+                return true;                
+            }
+        }
+        return false;
+    }
+    public static int getFirstUnattempted(List<QuestionState> qStates) {
+        int i;
+        for( i = 0; i<qStates.size() ; i++){
+            if(qStates.get(i).getState() == QuestionState.QStatEnum.INITIALIZED
+                    || qStates.get(i).getState() == QuestionState.QStatEnum.UNINITIALIZED){
+                return i;                
+            }
+        }
+        return i;
+    }
+    public static void resetQState(List<QuestionState> qStates,
+            QStatEnum stat) {
+        for(QuestionState s:qStates){
+            s.setState(stat);                    
+        }
+        
+    }
+    public static void dumpModule(ModCopy module) {
+        // TODO Auto-generated method stub
+        System.err.printf("name=%s, user=%s\n", module.getModId(), module.getUser());
+        for(QuestionState s: module.getQStates()){
+            System.err.printf("qid=%d, state=%s\n", s.getQid(), s.getState().name());
+        }
+    }
+    public static boolean sessionCheck(HttpServletRequest request) {
+        Session session = getSession(request.getCookies());
+        if (session == null) {
+           log.info("Session is null");           
+           request.setAttribute("loginop", "in");
+           return false;
+        } else{            
+           request.setAttribute("loginop", "out");
+           return true;
+        }
+    }
     
 }

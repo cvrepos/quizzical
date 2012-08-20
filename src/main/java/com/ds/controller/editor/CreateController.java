@@ -7,12 +7,11 @@ import org.slim3.controller.Navigation;
 
 import com.ds.model.Presentation;
 import com.ds.model.Session;
-import com.ds.service.QuizProcessorService;
-import com.ds.util.Utils;
+import com.ds.service.Utils;
 
 public class CreateController extends Controller {
 
-    private QuizProcessorService service = QuizProcessorService.getInstance();
+    
     
     @Override
     public Navigation run() throws Exception {
@@ -22,7 +21,7 @@ public class CreateController extends Controller {
         if(session == null){
             return redirect("../login");
         }
-        List<Presentation> typesList = service.getQuizTypes();
+        List<Presentation> typesList = Utils.getQuizTypes();
         requestScope("quiztypes", typesList);        
         return forward("create.jsp");
     }

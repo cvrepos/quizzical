@@ -7,11 +7,10 @@ import org.slim3.controller.Navigation;
 
 import com.ds.model.Presentation;
 import com.ds.model.Session;
-import com.ds.service.QuizProcessorService;
-import com.ds.util.Utils;
+import com.ds.service.Utils;
 
 public class UpdateController extends Controller {
-    private QuizProcessorService service = QuizProcessorService.getInstance();
+    
     
     @Override
     public Navigation run() throws Exception {
@@ -21,7 +20,7 @@ public class UpdateController extends Controller {
         }
         //we have to read all the available question types 
         //and send them to the jsp page        
-        List<Presentation> typesList = service.getQuizTypes();
+        List<Presentation> typesList = Utils.getQuizTypes();
         requestScope("quiztypes", typesList);        
         return forward("update.jsp");
     }

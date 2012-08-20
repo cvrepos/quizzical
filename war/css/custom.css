@@ -248,6 +248,9 @@ input{
 	width: 40%;
 	position:relative;			
 }
+.buttons input:hover{
+	background: #383;
+}
 
 .test_box{
 	width:100px;

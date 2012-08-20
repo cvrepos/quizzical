@@ -18,9 +18,7 @@
 <script type="text/javascript">
 $(function(){
 	//show only the module table 	
-	$("#module_views").show();
-	$("#module_form").hide();
-	$("#module_info").hide();
+	$("#module_views").show();		
 	var loadResponse = function(response) {
 		alert("submitted");
 		if(response.status == true){
@@ -67,11 +65,8 @@ $(function(){
 		 options.append($("<option />").val(module.mid).text(module.mname));
 		 console.log("<<< End module:" + module.mname);
 	 });				 
-										
-		$('#create-button').click( function() {
-			$('#module_form').show();	
-		});
-
+		
+		
 		//query to obtain all questions as 
 		$('#modules').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="module_table"></table>' );
 		var oTable  = $("#module_table").dataTable( {
@@ -88,7 +83,11 @@ $(function(){
 					],
 			"sDom" : '<"toolbar">frtip'
 		});
-		$("div.toolbar").html("<input type='button' id='button_add_module' value='Add New Module'></input>");
+		$("div.toolbar").html("<input  type='button' id='button_add_module' value='Add New Module'></input>");		
+		
+		$('#button_add_module').click( function() {
+			window.location.href = "/editor/addmodule";	
+		});
 		
 		var onModuleUpdate = function(response){
 			if(response.status == true){				
@@ -325,7 +324,8 @@ $(function(){
 	            $("#module_name").val(mname);
 	            $("#module_description").val(description);
 	            $("#module_id").val(mid);	            
-	            doAjax("QN_op=load_module&QN_mid=" + mid, onModuleLoad); 	            
+	            //doAjax("QN_op=load_module&QN_mid=" + mid, onModuleLoad);
+	            window.location.href = "/editor/editmodule?QN_mname="+mname+"&QN_mid="+mid;	               
 	        }
 	    });
 	    $("#back-button").click(function(){
@@ -358,7 +358,10 @@ $(function(){
     			<h3>Your modules</h3>
 				<div id="modules"></div>		
 			</div>
-	
+			<div id="hidden_form">
+				
+			</div>
+		<!-- 
 			<div id='module_info'>
 				<h3>Name</h3>
 				<input type='text' id='module_name'></input>
@@ -389,6 +392,7 @@ $(function(){
 				type='submit' name='submit' value='submit' />
 			</form>
 			</div>	
+			 -->
 		</div>
 		<jsp:include page="../common/footer.jsp" />
 	</div>

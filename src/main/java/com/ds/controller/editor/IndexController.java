@@ -12,22 +12,22 @@ import com.ds.model.Module;
 import com.ds.model.Presentation;
 import com.ds.model.Session;
 import com.ds.model.json.KeyValueMap;
-import com.ds.service.QuizProcessorService;
-import com.ds.util.Utils;
+import com.ds.service.Utils;
+import com.ds.util.ConstStrings;
+
 
 public class IndexController extends Controller {
 
-    private QuizProcessorService service = QuizProcessorService.getInstance();
+   
     
     @Override
     public Navigation run() throws Exception {
         //we have to read all the available question types 
         //and send them to the jsp page  
         Session session = Utils.getSession(request.getCookies()); 
-        if(!Utils.sessionCheck(request)){
-            String url = "../login?op=login";
-            request.setAttribute("orig", basePath );
-            return forward(response.encodeRedirectURL(url));
+        if(!Utils.sessionCheck(request)){            
+            request.setAttribute(ConstStrings.RETURN_TO, basePath );
+            return forward(response.encodeRedirectURL(ConstStrings.LOGIN_URL));
         }
       //get all the modules and add them to the request
         ModuleMeta m = ModuleMeta.get();

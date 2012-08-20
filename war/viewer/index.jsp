@@ -8,7 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>viewer Index</title>			
 <link type="text/css" href="../css/cube.css" rel="stylesheet" />
-<script type="text/javascript" src="../js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript" src="../js/json2.js"></script>
 <script type="text/javascript">
 var modJsons  = new Array();

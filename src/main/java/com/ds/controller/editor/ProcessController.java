@@ -22,14 +22,14 @@ import com.ds.model.Module;
 import com.ds.model.Session;
 import com.ds.model.Tag;
 import com.ds.model.Question;
-import com.ds.service.QuizProcessorService;
+import com.ds.service.Utils;
 import com.ds.service.ServiceResponse;
-import com.ds.util.StaticValues;
-import com.ds.util.Utils;
+import com.ds.util.ConstStrings;
+
 
 public class ProcessController extends Controller {
 
-    private QuizProcessorService service = QuizProcessorService.getInstance();
+   
     private static final Logger log = Logger.getLogger(ProcessController.class.getName());
     @Override
     public Navigation run() throws Exception {
@@ -39,17 +39,17 @@ public class ProcessController extends Controller {
             return redirect("../login");
         }
         //based on the opcode process request
-        String op = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "op");
+        String op = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "op");
         if(!Utils.isValid(op)){
             throw new ServletException("op cannot be empty");
         }
         if(op.equals("process")){        	
         	//based on the state of the module - operations will be performed
         	log.info("In op=process");
-        	String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
-            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mid);
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mname);
+        	String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"modid", mid);
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"mname", mname);
             return forward("modproc.jsp");
         }                
         else if(op.equals("add")){
@@ -64,7 +64,7 @@ public class ProcessController extends Controller {
                 throw new ServletException("question cannot be empty");
             }      
             String mid = (String) request.getAttribute("mid");            
-            respond(service.addQuestion(type, null, question, session, mid));
+            respond(Utils.addQuestion(type, null, question, session, mid));
                                  
         } else if(op.equals("delete")){
             log.info("op=delete");
@@ -73,7 +73,7 @@ public class ProcessController extends Controller {
             if(!Utils.isValid(key)){
                 throw new ServletException("key cannot be empty");
             }                                    
-            respond(service.deleteQuestion(key, session));            
+            respond(Utils.deleteQuestion(key, session));            
         } else if (op.equals("update")){
             log.info("op=update");
             //convert the question to appropriate type
@@ -85,10 +85,10 @@ public class ProcessController extends Controller {
             if(!Utils.isValid(question)){
                 throw new ServletException("question cannot be empty");
             }
-            respond(service.updateQuestion(key, question, session));            
+            respond(Utils.updateQuestion(key, question, session));            
         }  else if(op.equals("gettags")){
             log.info("gettags");
-            Iterator<Tag> tags = service.getTags(20);
+            Iterator<Tag> tags = Utils.getTags(20);
             PrintWriter w = this.response.getWriter();
             response.setContentType("text/html");
             String t = "<table id='tag-table'>\n";
@@ -112,7 +112,7 @@ public class ProcessController extends Controller {
             if(!Utils.isValid(query)){
                 throw new ServletException("search string cannot be empty");
             }                                                
-            respond(service.search(type, query, session)); 
+            respond(Utils.search(type, query, session)); 
             
         }else if(op.equals("download")){
             String type = (String) request.getAttribute("type");
@@ -125,63 +125,63 @@ public class ProcessController extends Controller {
         }else if(op.equals("addtag")){
             String parent = (String) request.getAttribute("parent");
             String childs = (String) request.getAttribute("childs");
-            service.addTag(parent, childs, false);
+            Utils.addTag(parent, childs, false);
             return forward("addtag.jsp");
         } else if(op.equals("create_mod")){
-            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "module");
-            String description = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "description");
-            String parent = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "parent");
-            String prevSibling = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "prevSibling");
+            String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "module");
+            String description = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "description");
+            String parent = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "parent");
+            String prevSibling = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "prevSibling");
             Module mod = null;
             if(parent != null && !parent.equals("none") ){    
             	log.info("calling createModuleAsChild");
-            	mod = service.createModuleAsChild(mname, description, Long.parseLong(parent), session.getUser());
+            	mod = Utils.createModuleAsChild(mname, description, Long.parseLong(parent), session.getUser());
             }
             else if(prevSibling != null && !prevSibling.equals("none")){
             	log.info("calling createModuleAsSibling");
-            	mod = service.createModuleAsSibling(mname, description, Long.parseLong(prevSibling), session.getUser());
+            	mod = Utils.createModuleAsSibling(mname, description, Long.parseLong(prevSibling), session.getUser());
             } else {
             	log.info("calling createModule");
-            	mod = service.createModule(mname, description,session.getUser());
+            	mod = Utils.createModule(mname, description,session.getUser());
             }
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mod.getKey().getId());
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mod.getName());
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"modid", mod.getKey().getId());
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"mname", mod.getName());
             return forward("module.jsp");
         } else if(op.equals("update_mod")){
-            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
-            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname");
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"modid", mid);
-            request.setAttribute(StaticValues.QUIZ_NAMESPACE +"mname", mname);
+            String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname");
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"modid", mid);
+            request.setAttribute(ConstStrings.QUIZ_NAMESPACE +"mname", mname);
             return forward("module.jsp");
         }
         else if(op.equals("load_module")){
         	log.info("load_module");
-            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
-            Utils.respond(service.loadModule(mid), response);
+            String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
+            Utils.respond(Utils.loadModule(mid), response);
             return null;
         }
         else if(op.equals("update_module_name")){
         	log.info("update_module_name");
-            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
-            String mname = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mname"); 
-            Module module = service.getModule(mid);
+            String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
+            String mname = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mname"); 
+            Module module = Utils.getModule(mid);
             if(module == null){
             	Utils.sendError("Unable to find module");
             }
             module.setName(mname);
-            Utils.respond(service.updateModule(module), response);
+            Utils.respond(Utils.updateModule(module), response);
             return null;
         }
         else if(op.equals("update_module_description")){
         	log.info("update_module_description");
-            String mid = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "mid");
-            String description = (String) request.getAttribute(StaticValues.QUIZ_NAMESPACE + "description"); 
-            Module module = service.getModule(mid);
+            String mid = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "mid");
+            String description = (String) request.getAttribute(ConstStrings.QUIZ_NAMESPACE + "description"); 
+            Module module = Utils.getModule(mid);
             if(module == null){
             	Utils.sendError("Unable to find module");
             }
             module.setDescription(description);
-            Utils.respond(service.updateModule(module), response);
+            Utils.respond(Utils.updateModule(module), response);
             return null;
         }
         return null;
@@ -240,7 +240,7 @@ public class ProcessController extends Controller {
         PrintWriter w = this.response.getWriter();
         response.setContentType("text/html");
         //parsing is done now perform query
-        Iterator<Question> quizes = service.getQuizes(question, tags, start, end, session.getUser());
+        Iterator<Question> quizes = Utils.getQuizes(question, tags, start, end, session.getUser());
         Gson gson = new Gson();
         while(quizes.hasNext()){
             Question q = quizes.next();

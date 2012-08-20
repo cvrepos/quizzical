@@ -11,11 +11,11 @@ import com.ds.meta.ModuleMeta;
 import com.ds.model.Module;
 import com.ds.model.Session;
 import com.ds.model.json.KeyValueMap;
-import com.ds.service.QuizProcessorService;
-import com.ds.util.Utils;
+import com.ds.service.Utils;
+
 
 public class TestpageController extends Controller {
-private QuizProcessorService service = QuizProcessorService.getInstance();
+
     
     @Override
     public Navigation run() throws Exception {
